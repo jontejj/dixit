@@ -153,9 +153,11 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		joinButton.addClickListener(e -> {
 			try
 			{
+				if(playerName.isEmpty())
+					throw new EmptyPlayerName();
 				joinGame(playerName.getValue(), currentGame);
 			}
-			catch(GameNotConfiguredYet | AllPlayersAlreadyJoined | PlayerNameAlreadyTaken error)
+			catch(GameNotConfiguredYet | AllPlayersAlreadyJoined | PlayerNameAlreadyTaken | EmptyPlayerName error)
 			{
 				Notification.show(error.getMessage());
 				return;

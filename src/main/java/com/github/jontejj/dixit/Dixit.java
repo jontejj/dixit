@@ -63,10 +63,11 @@ public class Dixit
 		if(players.size() >= desiredAmountOfPlayers)
 			throw new AllPlayersAlreadyJoined();
 
-		consumers.add(listener);
 		Participant participant = new Participant(player);
 		if(players.contains(participant))
 			throw new PlayerNameAlreadyTaken();
+
+		consumers.add(listener);
 		players.add(participant);
 		// TODO: consider this case
 		// if(placements > 0 && playerWhoJoined == Player.X)
