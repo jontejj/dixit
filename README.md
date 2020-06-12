@@ -70,3 +70,27 @@ Project follow the Maven's [standard directory layout structure](https://maven.a
 ## Notes
 
 If you run application from a command line, remember to prepend a `mvn` to the command.
+
+## Hot swapping (as Vaadin supports it pretty well)
+[https://dzone.com/articles/hot-swap-java-bytecode-on-runtime](https://dzone.com/articles/hot-swap-java-bytecode-on-runtime)
+
+Basically, 
+1. Download the appropriate release for your OS from here [https://github.com/TravaOpenJDK/trava-jdk-11-dcevm/releases/tag/dcevm-11.0.7%2B1](https://github.com/TravaOpenJDK/trava-jdk-11-dcevm/releases/tag/dcevm-11.0.7%2B1). 
+2. Configure your IDE to use that runtime instead
+
+## Moving to production
+
+### Generate runnable jar file
+```
+mvn package -Pproduction
+java -jar target/my-todo-1.0-SNAPSHOT-spring-boot.jar
+```
+
+### Installing a vm from scratch (debian) (GCE for example)
+```
+gcloud beta compute --project=dixit-280012 instances create dixit-1 --zone=us-east1-b --machine-type=f1-micro --subnet=default --network-tier=PREMIUM --maintenance-policy=MIGRATE --service-account=1054845846659-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append --image=debian-10-buster-v20200521 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=dixit-1 --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+#SSH to machine
+sudo apt-get install openjdk-11-jre
+
+```

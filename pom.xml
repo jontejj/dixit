@@ -72,6 +72,29 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- For java modules -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>4.0.0-b03</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.27.0-GA</version>
+			</dependency>
+			<!-- Dependency convergence -->
+			<dependency>
+				<groupId>com.squareup.okio</groupId>
+				<artifactId>okio</artifactId>
+				<version>1.17.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.19</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -79,7 +102,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<!-- Replace artifactId with vaadin-core to use only free components -->
-			<artifactId>vaadin</artifactId>
+			<artifactId>vaadin-core</artifactId>
 			<exclusions>
 				<!-- Webjars are only needed when running in Vaadin 13 compatibility 
 					mode -->
@@ -107,6 +130,11 @@
 					<groupId>org.webjars.bowergithub.webcomponents</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
+				<!-- Using the jakarta validation api instead
+				<exclusion>
+					<groupId>javax.validation</groupId>
+					<artifactId>validation-api</artifactId>
+				</exclusion> -->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -117,6 +145,14 @@
 				<exclusion>
 					<groupId>com.vaadin</groupId>
 					<artifactId>vaadin-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>jakarta.annotation</groupId>
+					<artifactId>jakarta.annotation-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>jakarta.validation</groupId>
+					<artifactId>jakarta.validation-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -139,14 +175,46 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.code.findbugs</groupId>
+					<artifactId>jsr305</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.code.findbugs</groupId>
+					<artifactId>jsr305</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+		<!-- For java modules -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-annotations-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+		</dependency>
+		<!-- <dependency> <groupId>javax.servlet</groupId> <artifactId>javax.servlet-api</artifactId> 
+			<scope>compile</scope> </dependency> -->
 	</dependencies>
 
 	<build>
 		<defaultGoal>spring-boot:run</defaultGoal>
 		<plugins>
+			<!-- JDK 11 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -172,6 +240,72 @@
 					</argLine>
 				</configuration>
 			</plugin>
+			<!-- Java modules -->
+			<plugin>
+				<groupId>org.moditect</groupId>
+				<artifactId>moditect-maven-plugin</artifactId>
+				<version>1.0.0.Beta2</version>
+				<executions>
+					<execution>
+						<id>create-runtime-image</id>
+						<phase>package</phase>
+						<goals>
+							<goal>create-runtime-image</goal>
+						</goals>
+						<configuration>
+							<modulePath>
+								<path>
+									${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}
+								</path>
+								<path>${project.build.directory}/dependency</path>
+							</modulePath>
+							<modules>
+								<module>com.github.jontejj.dixit</module>
+							</modules>
+							<launcher>
+								<name>dixit-server</name>
+								<module>
+									com.github.jontejj.dixit/com.github.jontejj.dixit.Application
+								</module>
+							</launcher>
+							<outputDirectory>
+								${project.build.directory}/jlink-image
+							</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>post-clean</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Dependency convergence -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce</id>
+						<configuration>
+							<rules>
+								<dependencyConvergence />
+							</rules>
+						</configuration>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Vaadin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -181,19 +315,9 @@
 					<wait>500</wait>
 					<maxAttempts>240</maxAttempts>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-						<configuration>
-							<classifier>spring-boot</classifier>
-							<mainClass>
-								com.github.jontejj.dixit.Application
-							</mainClass>
-						</configuration>
-					</execution>
-				</executions>
+				<!-- <executions> <execution> <goals> <goal>repackage</goal> </goals> 
+					<configuration> <classifier>spring-boot</classifier> <mainClass> com.github.jontejj.dixit.Application 
+					</mainClass> </configuration> </execution> </executions> -->
 			</plugin>
 
 			<!-- Take care of synchronizing java dependencies and imports in package.json 

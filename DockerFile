@@ -1,0 +1,13 @@
+FROM maven:3.6-jdk-12-alpine as build
+
+WORKDIR /app
+COPY pom.xml .
+COPY src src
+#https://stackoverflow.com/questions/8310539/how-to-copy-dependencies-jars-without-test-jars-to-a-directory-using-maven
+#mvn clean dependency:copy-dependencies -DincludeScope=runtime
+RUN mvn package -Pproduction
+
+FROM alpine:3.8
+
+COPY --from=build /app/target/jlink-image /app
+ENTRYPOINT ["/app/bin/dixit-server"]
