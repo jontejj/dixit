@@ -5,3 +5,5 @@ Layout should be nicer
 Clean up code
 Show cards whilst others are picking?
 Remember what cards people pick to what sentences -> could be an interesting dataset to train on later
+
+Copy to clipboard button

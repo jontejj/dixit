@@ -46,7 +46,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	private VerticalLayout messages = new VerticalLayout();
 
-	private Label gameIdLabel;
+	// private Label gameIdLabel;
 
 	Participant me;
 
@@ -63,8 +63,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		Image img = new Image(BUCKET_BASEPATH + "1.png", "1.png");
 		// todosList.add(img);
 
-		gameIdLabel = new Label(this.gameId);
-		gameIdLabel.setTitle("Game id");
+		// gameIdLabel = new Label(this.gameId);
+		// gameIdLabel.setTitle("Game id");
 
 		// waitUntilAllPlayersHaveJoined();
 		// TextField taskField = new TextField(); // (2)
@@ -83,12 +83,12 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		logo.addClickListener(e -> {
 			removeAll();
 			messages = new VerticalLayout();
-			add(logo, gameIdLabel);
+			add(logo);
 			currentGame = null;
 			me = null;
 			getUI().get().navigate(DixitView.class);
 		});
-		add(logo, gameIdLabel);
+		add(logo);
 
 		// add(gameLink(this.gameId));
 	}
@@ -124,7 +124,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	{
 		VerticalLayout createGameArea = new VerticalLayout();
 		IntegerField desiredAmountOfPlayers = new IntegerField();
-		desiredAmountOfPlayers.setLabel("Desired amount of players");
+		desiredAmountOfPlayers.setLabel("Nr of players");
 		desiredAmountOfPlayers.setMin(2);
 		desiredAmountOfPlayers.setMax(Dixit.CARDS_IN_DECK / Dixit.CARDS_IN_HAND);
 		desiredAmountOfPlayers.setValue(5);
@@ -198,7 +198,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		// chatMessage.addShortcut(Key.ENTER);
 		TextField chatMessageSender = new TextField();
 		chatMessageSender.addKeyUpListener(Key.ENTER, (e) -> {
-			currentGame.broadcast(new ChatMessageEvent(chatMessageSender.getValue()));
+			currentGame.broadcast(new ChatMessageEvent(me.player, chatMessageSender.getValue()));
 		});
 		// (message) -> currentGame.broadcast(new ChatMessageEvent(message)));
 		// Shortcut.add(chatMessageSender, Key.ENTER, () -> {
@@ -299,7 +299,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	public void setGameId(String gameId)
 	{
 		this.gameId = gameId;
-		this.gameIdLabel.setText(this.gameId);
+		// this.gameIdLabel.setText(this.gameId);
 	}
 
 	public void askForSentence()
@@ -366,7 +366,6 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			addSystemMessage("Here are the cards the other players picked");
 			showCardsWithPicker(givenCards, (card) -> {
 			});
-			// TODO: how to remove?
 		}
 		else
 		{

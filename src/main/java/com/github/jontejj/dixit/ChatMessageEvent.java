@@ -16,10 +16,12 @@ package com.github.jontejj.dixit;
 
 public class ChatMessageEvent extends GameEvent
 {
+	private final Player sender;
 	private final String message;
 
-	ChatMessageEvent(String message)
+	ChatMessageEvent(Player sender, String message)
 	{
+		this.sender = sender;
 		this.message = message;
 
 	}
@@ -39,6 +41,6 @@ public class ChatMessageEvent extends GameEvent
 	@Override
 	public String toString()
 	{
-		return message;
+		return sender + ": " + message;
 	}
 }
