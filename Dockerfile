@@ -59,6 +59,6 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 COPY --from=packager "$JAVA_HOME" "$JAVA_HOME"
 COPY --from=packager "/app/target/dixit-0.7-spring-boot.jar" "/app.jar"
 
-EXPOSE 8080
+EXPOSE 80
 CMD [ "-jar", "/app.jar" ]
 ENTRYPOINT [ "java" ]
