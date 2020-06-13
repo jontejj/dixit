@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import com.github.jontejj.dixit.Participant.InvalidCardPicked;
 import com.google.common.collect.Lists;
@@ -49,8 +50,12 @@ public class StoryTeller
 			throw new InvalidCardPicked("The chosen card was not in the story tellers hand");
 	}
 
-	public void givePickedCard(PickedCard card)
+	public void givePickedCard(PickedCard card) throws PlayerAlreadyGaveCard
 	{
+		Optional<PickedCard> alreadyGivenBySamePlayer = givenCards.stream()
+				.filter(alreadyGivenCard -> alreadyGivenCard.pickedBy.player.equals(card.pickedBy.player)).findFirst();
+		if(alreadyGivenBySamePlayer.isPresent())
+			throw new PlayerAlreadyGaveCard();
 		givenCards.add(card);
 	}
 

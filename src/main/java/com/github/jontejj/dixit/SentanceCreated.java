@@ -46,7 +46,7 @@ public class SentanceCreated extends GameEvent
 					view.me.cards.remove(card);
 					view.currentGame.giveOneCardToPlayer(view.me);
 				}
-				catch(InvalidCardPicked | EmptyDeck error)
+				catch(InvalidCardPicked | EmptyDeck | PlayerAlreadyGaveCard error)
 				{
 					Notification.show(error.getMessage());
 				}
