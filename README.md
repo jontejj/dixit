@@ -71,5 +71,24 @@ Project follow the Maven's [standard directory layout structure](https://maven.a
 
 If you run application from a command line, remember to prepend a `mvn` to the command.
 
+## Hot swapping (as Vaadin supports it pretty well)
+[https://dzone.com/articles/hot-swap-java-bytecode-on-runtime](https://dzone.com/articles/hot-swap-java-bytecode-on-runtime)
+
+Basically, 
+1. Download the appropriate release for your OS from here [https://github.com/TravaOpenJDK/trava-jdk-11-dcevm/releases/tag/dcevm-11.0.7%2B1](https://github.com/TravaOpenJDK/trava-jdk-11-dcevm/releases/tag/dcevm-11.0.7%2B1). 
+2. Configure your IDE to use that runtime instead
+
+## Moving to production
+
+### Generate runnable jar file
+```
+mvn package -Pproduction
+java -jar target/my-todo-1.0-SNAPSHOT-spring-boot.jar
+```
+
+### Creating an instance running a docker image
+
+gcloud beta compute --project=dixit-280012 instances create-with-container dixit-docker --zone=us-east1-b --machine-type=f1-micro --subnet=default --network-tier=PREMIUM --metadata=google-logging-enabled=true --maintenance-policy=MIGRATE --service-account=1054845846659-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append --image=cos-stable-81-12871-119-0 --image-project=cos-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=dixit-docker --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --container-image=docker.io/jontejj/dixit:sha-1f9fecd --container-restart-policy=always --container-tty --labels=container-vm=cos-stable-81-12871-119-0 --reservation-affinity=any
+
 ## TODO
 - Modularize with https://blogs.oracle.com/javamagazine/containerizing-apps-with-jlink
