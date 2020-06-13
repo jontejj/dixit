@@ -29,6 +29,7 @@ jobs:
           add_git_labels: true
           path: /home/runner/work/dixit/dixit
           dockerfile: /home/runner/work/dixit/dixit/Dockerfile
+          cache_froms: jontejj/dixit:latest 
           
       # Setup gcloud CLI
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
