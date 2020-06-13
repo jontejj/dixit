@@ -41,7 +41,7 @@ public class Dixit
 	private Deque<Card> deck = null;
 
 	int desiredAmountOfPlayers = UNDEFINED;
-	int currentStoryTellerIndex = 0;
+	private int currentStoryTellerIndex = 0;
 
 	// TODO(jontejj): benchmark and test to see if more threads are needed
 	static ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -158,7 +158,8 @@ public class Dixit
 
 	private StoryTeller pickStoryTeller()
 	{
-		currentStoryTellerIndex = currentStoryTellerIndex++ % players.size();
+		currentStoryTellerIndex += 1;
+		currentStoryTellerIndex = currentStoryTellerIndex % players.size();
 		Participant participant = players.get(currentStoryTellerIndex);
 		broadcast(new StoryTellerPicked(participant.player));
 		return new StoryTeller(participant);

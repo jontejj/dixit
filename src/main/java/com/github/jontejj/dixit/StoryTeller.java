@@ -40,11 +40,13 @@ public class StoryTeller
 		this.participant = participant;
 	}
 
-	public void makeUpSentance(String aSentence, Card aChosenCard)
+	public void makeUpSentance(String aSentence, Card aChosenCard) throws InvalidCardPicked
 	{
 		givenCards.add(new PickedCard(aChosenCard, participant));
 		this.sentence = aSentence;
 		this.chosenCard = aChosenCard;
+		if(!participant.cards.remove(aChosenCard))
+			throw new InvalidCardPicked("The chosen card was not in the story tellers hand");
 	}
 
 	public void givePickedCard(PickedCard card)

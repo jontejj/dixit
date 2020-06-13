@@ -43,6 +43,7 @@ public class SentanceCreated extends GameEvent
 					PickedCard pickedCard = view.me.pickCardThatMatchesTheStoryTellers(card);
 					view.currentGame.currentStoryTeller.givePickedCard(pickedCard);
 					view.currentGame.broadcast(new PlayerPickedMatchingCard(view.me.player));
+					view.me.cards.remove(card);
 					view.currentGame.giveOneCardToPlayer(view.me);
 				}
 				catch(InvalidCardPicked | EmptyDeck error)

@@ -314,7 +314,15 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		sentenceField.addKeyUpListener(Key.ENTER, (e) -> {
 			if(pickedCard.get() != null)
 			{
-				currentGame.currentStoryTeller.makeUpSentance(sentenceField.getValue(), pickedCard.get());
+				try
+				{
+					currentGame.currentStoryTeller.makeUpSentance(sentenceField.getValue(), pickedCard.get());
+				}
+				catch(InvalidCardPicked invalidCard)
+				{
+					Notification.show(invalidCard.getMessage());
+					return;
+				}
 				currentGame.broadcast(new SentanceCreated(sentenceField.getValue()));
 				remove(sentenceArea);
 			}
@@ -329,7 +337,15 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		showCardsWithPicker(me.cards, card -> {
 			if(sentence.get() != null)
 			{
-				currentGame.currentStoryTeller.makeUpSentance(sentenceField.getValue(), card);
+				try
+				{
+					currentGame.currentStoryTeller.makeUpSentance(sentenceField.getValue(), card);
+				}
+				catch(InvalidCardPicked invalidCard)
+				{
+					Notification.show(invalidCard.getMessage());
+					return;
+				}
 				currentGame.broadcast(new SentanceCreated(sentenceField.getValue()));
 				remove(sentenceArea);
 			}
