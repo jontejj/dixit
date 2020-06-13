@@ -19,6 +19,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: jontejj/dixit
           tags: latest
-          tag_with_ref:  true
+          tag_with_ref: true
           tag_with_sha: true
           add_git_labels: true
