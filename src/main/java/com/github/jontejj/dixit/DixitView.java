@@ -20,6 +20,9 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.FlexLayout.FlexDirection;
+import com.vaadin.flow.component.orderedlayout.FlexLayout.FlexWrap;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -50,12 +53,21 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	Participant me;
 
-	private VerticalLayout gameArea;
+	private FlexLayout gameArea;
 
-	private HorizontalLayout cardArea;
+	private FlexLayout cardArea;
+
+	private FlexLayout left;
+	private FlexLayout right;
 
 	public DixitView(@Autowired Games games)
 	{
+		left = new FlexLayout();
+		right = new FlexLayout();
+		right.setFlexDirection(FlexDirection.ROW_REVERSE);
+		add(left, right);
+		// setFlexDirection(FlexDirection.COLUMN);
+		// setFlexWrap(FlexWrap.WRAP);
 		this.games = games;
 		// String gameId = firstNonNull(vaadinRequest.getParameter("game"), UUID.randomUUID().toString());
 		// Dixit game = games.getOrCreate(gameId);
@@ -81,14 +93,15 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		// new HorizontalLayout(taskField, addButton)
 		H1 logo = new H1("Dixit");
 		logo.addClickListener(e -> {
-			removeAll();
+			left.removeAll();
+			right.removeAll();
 			messages = new VerticalLayout();
-			add(logo);
+			left.add(logo);
 			currentGame = null;
 			me = null;
 			getUI().get().navigate(DixitView.class);
 		});
-		add(logo);
+		left.add(logo);
 
 		// add(gameLink(this.gameId));
 	}
@@ -135,11 +148,11 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			Dixit createdGame = games.getOrCreate(this.gameId);
 			createdGame.desiredAmountOfPlayers = desiredAmountOfPlayers.getValue();
 			getUI().get().navigate(this.gameId);
-			this.remove(createGameArea);
+			left.remove(createGameArea);
 			// addJoinUI();
 		});
 		createGameArea.add(desiredAmountOfPlayers, createButton);
-		add(createGameArea);
+		left.add(createGameArea);
 	}
 
 	private void addJoinUI()
@@ -162,23 +175,24 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 				Notification.show(error.getMessage());
 				return;
 			}
-			this.remove(joinArea);
+			left.remove(joinArea);
 			playerName.setEnabled(false);
-			repaintGameInfoArea();
 			addMessagingArea();
+			repaintGameInfoArea();
 		});
 		joinArea.add(playerName, joinButton);
-		add(joinArea);
+		left.add(joinArea);
 	}
 
 	void repaintGameInfoArea()
 	{
 		if(gameArea != null)
 		{
-			remove(gameArea);
+			left.remove(gameArea);
 		}
 
-		gameArea = new VerticalLayout();
+		gameArea = new FlexLayout();
+		gameArea.setFlexDirection(FlexDirection.COLUMN);
 
 		gameArea.add(new Label("My name: " + me.player.name));
 		gameArea.add(new Label("Scores"));
@@ -187,12 +201,13 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			gameArea.add(new Label(player.player.name + " : " + player.score));
 		}
 		// Players - score
-		add(gameArea);
+		left.add(gameArea);
 	}
 
 	private void addMessagingArea()
 	{
-		VerticalLayout messagingArea = new VerticalLayout();
+		FlexLayout messagingArea = new FlexLayout();
+		messagingArea.setFlexDirection(FlexDirection.COLUMN);
 
 		// Input chatMessage = new Input();
 		// chatMessage.addShortcut(Key.ENTER);
@@ -211,7 +226,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		// ;
 		// });
 		messagingArea.add(chatMessageSender, messages);
-		add(messagingArea);
+		right.add(messagingArea);
 	}
 
 	public void receiveEvent(GameEvent event)
@@ -324,7 +339,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 					return;
 				}
 				currentGame.broadcast(new SentanceCreated(sentenceField.getValue()));
-				remove(sentenceArea);
+				left.remove(sentenceArea);
 			}
 			else
 			{
@@ -333,7 +348,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		});
 
 		sentenceArea.add(sentenceField);
-		add(sentenceArea);
+		left.add(sentenceArea);
 		showCardsWithPicker(me.cards, card -> {
 			if(sentence.get() != null)
 			{
@@ -347,7 +362,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 					return;
 				}
 				currentGame.broadcast(new SentanceCreated(sentenceField.getValue()));
-				remove(sentenceArea);
+				left.remove(sentenceArea);
 			}
 			else
 			{
@@ -359,7 +374,9 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	public void showCardsWithPicker(List<? extends Card> cardsToPickAmongst, Consumer<Card> pickedCardAction)
 	{
 		removeCardArea();
-		cardArea = new HorizontalLayout();
+		cardArea = new FlexLayout();
+		cardArea.setFlexDirection(FlexDirection.ROW);
+		cardArea.setFlexWrap(FlexWrap.WRAP);
 		for(Card card : cardsToPickAmongst)
 		{
 			Image cardImage = new Image(BUCKET_BASEPATH + card.number + ".png", card.toString());
@@ -371,7 +388,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			});
 			cardArea.add(cardImage);
 		}
-		add(cardArea);
+		left.add(cardArea);
 	}
 
 	public void showPickedCardsToPlayersAndAskToPickStoryTellersCard()
@@ -405,7 +422,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	{
 		if(cardArea != null)
 		{
-			remove(cardArea);
+			left.remove(cardArea);
 		}
 	}
 }
