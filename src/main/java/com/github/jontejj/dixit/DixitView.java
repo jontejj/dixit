@@ -384,7 +384,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			cardImage.setMaxHeight("293px");
 			cardImage.addClickListener((e) -> {
 				pickedCardAction.accept(card);
-				DixitView.this.remove(cardArea);
+				left.remove(cardArea);
 			});
 			cardArea.add(cardImage);
 		}

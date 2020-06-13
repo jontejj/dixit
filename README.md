@@ -92,3 +92,6 @@ gcloud beta compute --project=dixit-280012 instances create-with-container dixit
 
 ## TODO
 - Modularize with https://blogs.oracle.com/javamagazine/containerizing-apps-with-jlink
+
+## Links
+[https://github.com/GoogleCloudPlatform/github-actions/blob/master/example-workflows/gce/README.md](https://github.com/GoogleCloudPlatform/github-actions/blob/master/example-workflows/gce/README.md) 
