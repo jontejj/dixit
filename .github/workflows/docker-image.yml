@@ -5,7 +5,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+env:
+  PROJECT_ID: ${{ secrets.GCE_PROJECT }}
+  GCE_INSTANCE: dixit-docker
+  GCE_INSTANCE_ZONE: us-east1-b
+ 
 jobs:
 
   build:
@@ -25,3 +29,13 @@ jobs:
           add_git_labels: true
           path: /home/runner/work/dixit/dixit
           dockerfile: /home/runner/work/dixit/dixit/Dockerfile
+          
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCE_SA_KEY }}
+          project_id: ${{ secrets.GCE_PROJECT }}
+      - name: Deploy
+        run: |-
+         gcloud compute instances update-container "$GCE_INSTANCE" --zone "$GCE_INSTANCE_ZONE" --container-image "docker.io/jontejj/dixit:latest"   
