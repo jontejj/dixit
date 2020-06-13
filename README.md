@@ -70,3 +70,6 @@ Project follow the Maven's [standard directory layout structure](https://maven.a
 ## Notes
 
 If you run application from a command line, remember to prepend a `mvn` to the command.
+
+## TODO
+- Modularize with https://blogs.oracle.com/javamagazine/containerizing-apps-with-jlink
