@@ -48,21 +48,7 @@ COPY webpack.config.js webpack.config.js
 RUN mvn package -Pproduction
 
 # build modules distribution
-RUN jlink \
-    --verbose \
-    --add-modules \
-        java.base,java.logging
-        #,java.naming,java.desktop,java.management,java.security.jgss,java.instrument \
-        # java.naming - javax/naming/NamingException
-        # java.desktop - java/beans/PropertyEditorSupport
-        # java.management - javax/management/MBeanServer
-        # java.security.jgss - org/ietf/jgss/GSSException
-        # java.instrument - java/lang/instrument/IllegalClassFormatException
-    --compress 2 \
-    #--strip-debug \
-    --no-header-files \
-    --no-man-pages \
-    --output "$JAVA_MINIMAL"
+RUN jlink --verbose --add-modules java.base,java.logging --no-header-files --no-man-pages --output "$JAVA_MINIMAL"
 
 # Second stage, add only our minimal "JRE" distr and our app
 FROM debian:stretch-slim
