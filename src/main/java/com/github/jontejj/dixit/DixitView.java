@@ -41,6 +41,11 @@ import com.vaadin.flow.router.Route;
 @Push
 public class DixitView extends HorizontalLayout implements HasUrlParameter<String>
 {
+	enum Selectable
+	{
+		YES,
+		NO
+	}
 
 	private static final String BUCKET_BASEPATH = "https://storage.googleapis.com/com-github-jontejj-dixit/cards/";
 
@@ -335,7 +340,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			{
 				pickedCard.set(card);
 			}
-		});
+		}, Selectable.YES);
 	}
 
 	private void pickCardAndSentenceAsStoryTeller(Card chosenCard, String message)
@@ -350,7 +355,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		}
 	}
 
-	public void showCardsWithPicker(List<? extends Card> cardsToPickAmongst, Consumer<Card> pickedCardAction)
+	public void showCardsWithPicker(List<? extends Card> cardsToPickAmongst, Consumer<Card> pickedCardAction, Selectable selectable)
 	{
 		removeCardArea();
 		cardArea = new FlexLayout();
@@ -359,6 +364,10 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		for(Card card : cardsToPickAmongst)
 		{
 			Image cardImage = imageFor(card);
+			if(selectable == Selectable.YES)
+			{
+				cardImage.addClassName("selectable");
+			}
 			cardImage.addClickListener((e) -> {
 				pickedCardAction.accept(card);
 				left.remove(cardArea);
@@ -382,7 +391,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		{
 			addSystemMessage("Here are the cards the other players picked");
 			showCardsWithPicker(givenCards, (card) -> {
-			});
+			}, Selectable.NO);
 		}
 		else
 		{
@@ -398,7 +407,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 				{
 					Notification.show(e.getMessage());
 				}
-			});
+			}, Selectable.YES);
 		}
 	}
 

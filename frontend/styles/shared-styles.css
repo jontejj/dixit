@@ -26,9 +26,11 @@ vaadin-checkbox {
 	object-fit: scale-down;
 	width: 150px;
     height: 220px;
-	/* width: 12vw;
-	height: 17.58vh;
-	*/
+    border: 2px solid transparent;
+}
+
+.card.selectable:hover {
+  border: 2px solid black;
 }
 
 .messagingArea {

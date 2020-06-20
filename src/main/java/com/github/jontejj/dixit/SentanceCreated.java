@@ -14,6 +14,7 @@
  */
 package com.github.jontejj.dixit;
 
+import com.github.jontejj.dixit.DixitView.Selectable;
 import com.github.jontejj.dixit.Participant.InvalidCardPicked;
 import com.vaadin.flow.component.notification.Notification;
 
@@ -51,7 +52,7 @@ public class SentanceCreated extends GameEvent
 				{
 					Notification.show(error.getMessage());
 				}
-			});
+			}, Selectable.YES);
 		}
 	}
 
