@@ -17,6 +17,7 @@ package com.github.jontejj.dixit;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -50,7 +51,7 @@ public final class RoundSummarization
 
 	public static final class Scores
 	{
-		private final Multimap<Player, Integer> scores = LinkedHashMultimap.create();
+		private final Multimap<Player, Integer> scores = ArrayListMultimap.create();
 
 		Scores(Multimap<Player, Integer> scores)
 		{

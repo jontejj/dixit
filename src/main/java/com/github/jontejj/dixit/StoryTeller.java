@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import com.github.jontejj.dixit.Participant.InvalidCardPicked;
 import com.github.jontejj.dixit.RoundSummarization.Scores;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -98,7 +99,7 @@ public class StoryTeller
 			guesses.put(card, playerThatGuessed);
 		});
 
-		Multimap<Player, Integer> scores = LinkedHashMultimap.create();
+		Multimap<Player, Integer> scores = ArrayListMultimap.create();
 
 		int playersThatPickedTheRightCard = 0;
 		for(Entry<Player, PickedCard> playerPick : guessedCards.entrySet())
