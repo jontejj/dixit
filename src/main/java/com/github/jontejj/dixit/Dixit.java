@@ -111,6 +111,11 @@ public class Dixit
 		}
 	}
 
+	public boolean isInPlay()
+	{
+		return currentStoryTeller != null;
+	}
+
 	public void play()
 	{
 		broadcast(new GameStarted());
@@ -169,6 +174,11 @@ public class Dixit
 		{
 			throw new EmptyDeck();
 		}
+	}
+
+	public int cardsRemaining()
+	{
+		return deck.size();
 	}
 
 	private boolean outOfTurns()

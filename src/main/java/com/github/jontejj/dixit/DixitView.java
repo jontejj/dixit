@@ -186,6 +186,10 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		gameArea.setFlexWrap(FlexWrap.NOWRAP);
 		gameArea.setFlexDirection(FlexDirection.COLUMN);
 
+		if(currentGame.isInPlay())
+		{
+			gameArea.add(new Label("Cards remaining: " + currentGame.cardsRemaining()));
+		}
 		gameArea.add(new Label("My name: " + me.player.name));
 		gameArea.add(new Label("Scores:"));
 		for(Participant player : currentGame.players)
