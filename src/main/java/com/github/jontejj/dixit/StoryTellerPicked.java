@@ -35,7 +35,6 @@ public class StoryTellerPicked extends GameEvent
 		{
 			view.addSystemMessage("Roll your thumbs while the story teller makes up a sentence");
 		}
-		view.repaintGameInfoArea();
 	}
 
 	@Override

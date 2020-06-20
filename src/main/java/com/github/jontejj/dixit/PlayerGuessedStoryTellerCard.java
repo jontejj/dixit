@@ -27,7 +27,7 @@ public class PlayerGuessedStoryTellerCard extends GameEvent
 	@Override
 	public void execute(DixitView view)
 	{
-		if(view.me.player.equals(view.currentGame.currentStoryTeller.participant.player))
+		if(view.me.player.equals(view.currentGame.currentStoryTeller.player))
 		{
 			if(view.currentGame.currentStoryTeller.hasCollectedAllGuesses())
 			{

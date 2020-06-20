@@ -22,38 +22,39 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.github.jontejj.dixit.Participant.InvalidCardPicked;
+import com.github.jontejj.dixit.RoundSummarization.Scores;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 /**
  * Looks at 6 cards in her hand
  */
 public class StoryTeller
 {
-	Participant participant;
+	Player player;
 	private List<PickedCard> givenCards = Lists.newCopyOnWriteArrayList();
 	String sentence;
 	private Card chosenCard;
-	private Map<Participant, PickedCard> guessedCards = Maps.newConcurrentMap();
+	private Map<Player, PickedCard> guessedCards = Maps.newConcurrentMap();
 
-	StoryTeller(Participant participant)
+	StoryTeller(Player player)
 	{
-		this.participant = participant;
+		this.player = player;
 	}
 
-	public void makeUpSentance(String aSentence, Card aChosenCard) throws InvalidCardPicked
+	public void makeUpSentance(String aSentence, Card aChosenCard)
 	{
-		givenCards.add(new PickedCard(aChosenCard, participant));
+		givenCards.add(new PickedCard(aChosenCard, player));
 		this.sentence = aSentence;
 		this.chosenCard = aChosenCard;
-		if(!participant.cards.remove(aChosenCard))
-			throw new InvalidCardPicked("The chosen card was not in the story tellers hand");
 	}
 
 	public void givePickedCard(PickedCard card) throws PlayerAlreadyGaveCard
 	{
 		Optional<PickedCard> alreadyGivenBySamePlayer = givenCards.stream()
-				.filter(alreadyGivenCard -> alreadyGivenCard.pickedBy.player.equals(card.pickedBy.player)).findFirst();
+				.filter(alreadyGivenCard -> alreadyGivenCard.pickedBy.equals(card.pickedBy)).findFirst();
 		if(alreadyGivenBySamePlayer.isPresent())
 			throw new PlayerAlreadyGaveCard();
 		givenCards.add(card);
@@ -71,7 +72,7 @@ public class StoryTeller
 		return copy;
 	}
 
-	public void betOnStoryTellersCard(Card cardToBetOn, Participant byPlayer) throws InvalidCardPicked
+	public void betOnStoryTellersCard(Card cardToBetOn, Player byPlayer) throws InvalidCardPicked
 	{
 		PickedCard pickedCardToBetOn = givenCards.stream().filter(p -> p.equals(cardToBetOn)).findFirst()
 				.orElseThrow(() -> new InvalidCardPicked(cardToBetOn + " was not among the picked cards"));
@@ -89,10 +90,18 @@ public class StoryTeller
 	 * Otherwise the storyteller and whoever found the correct answer score 3.
 	 * Players score 1 point for every vote for their own card.
 	 */
-	public void distributeScores()
+	public RoundSummarization summarizeRound()
 	{
+		Multimap<PickedCard, Player> guesses = LinkedHashMultimap.create();
+
+		guessedCards.forEach((playerThatGuessed, card) -> {
+			guesses.put(card, playerThatGuessed);
+		});
+
+		Multimap<Player, Integer> scores = LinkedHashMultimap.create();
+
 		int playersThatPickedTheRightCard = 0;
-		for(Entry<Participant, PickedCard> playerPick : guessedCards.entrySet())
+		for(Entry<Player, PickedCard> playerPick : guessedCards.entrySet())
 		{
 			if(playerPick.getValue().equals(chosenCard))
 			{
@@ -101,18 +110,18 @@ public class StoryTeller
 		}
 		if(playersThatPickedTheRightCard != 0 && playersThatPickedTheRightCard != guessedCards.size())
 		{
-			participant.score += 3;
-			for(Entry<Participant, PickedCard> playerPick : guessedCards.entrySet())
+			scores.put(player, 3);
+			for(Entry<Player, PickedCard> playerPick : guessedCards.entrySet())
 			{
 				if(playerPick.getValue().equals(chosenCard))
 				{
-					playerPick.getKey().score += 3;
+					scores.put(playerPick.getKey(), 3);
 				}
 			}
 		}
 		else
 		{
-			guessedCards.keySet().forEach(otherPlayer -> otherPlayer.score += 2);
+			guessedCards.keySet().forEach(otherPlayer -> scores.put(otherPlayer, 2));
 		}
 		for(PickedCard guessedCard : guessedCards.values())
 		{
@@ -122,10 +131,11 @@ public class StoryTeller
 				{
 					if(guessedCard.equals(givenCard))
 					{
-						givenCard.pickedBy.score += 1;
+						scores.put(givenCard.pickedBy, 1);
 					}
 				}
 			}
 		}
+		return new RoundSummarization(player, new Scores(scores), guesses);
 	}
 }

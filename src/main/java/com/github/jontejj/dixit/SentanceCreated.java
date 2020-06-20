@@ -29,17 +29,18 @@ public class SentanceCreated extends GameEvent
 	@Override
 	public void execute(DixitView view)
 	{
-		if(view.me.equals(view.currentGame.currentStoryTeller.participant))
+		if(view.me.player.equals(view.currentGame.currentStoryTeller.player))
 		{
 			view.addSystemMessage("Roll your thumbs while other players are picking a card to match your sentence");
 		}
 		else
 		{
-			Player storyTeller = view.currentGame.currentStoryTeller.participant.player;
+			Player storyTeller = view.currentGame.currentStoryTeller.player;
 			view.addSystemMessage(storyTeller + " says: " + message + ". Pick one of your cards that you think matches");
 			view.showCardsWithPicker(view.me.cards, card -> {
 				try
 				{
+					// TODO: these operations should be done inside of Dixit
 					PickedCard pickedCard = view.me.pickCardThatMatchesTheStoryTellers(card);
 					view.currentGame.currentStoryTeller.givePickedCard(pickedCard);
 					view.currentGame.broadcast(new PlayerPickedMatchingCard(view.me.player));

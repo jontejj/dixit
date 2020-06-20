@@ -16,9 +16,9 @@ package com.github.jontejj.dixit;
 
 public class PickedCard extends Card
 {
-	final Participant pickedBy;
+	final Player pickedBy;
 
-	PickedCard(Card pickedCard, Participant pickedBy)
+	PickedCard(Card pickedCard, Player pickedBy)
 	{
 		super(pickedCard.number);
 		this.pickedBy = pickedBy;

@@ -14,15 +14,28 @@
  */
 package com.github.jontejj.dixit;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
-//@Route
-public class CreateView extends VerticalLayout
+public class RoundSummarizedEvent extends GameEvent
 {
-	public CreateView(@Autowired Games games)
+
+	private final RoundSummarization summarization;
+
+	RoundSummarizedEvent(RoundSummarization summarization)
 	{
-		// add(components);
+		this.summarization = summarization;
+	}
+
+	@Override
+	public void execute(DixitView view)
+	{
+		// refresh scores view as scores have been updated
+		view.repaintGameInfoArea();
+		// Show summary of the last story tellers round
+		view.showSummarization(summarization);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Round completed";
 	}
 }

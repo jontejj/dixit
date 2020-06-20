@@ -13,3 +13,29 @@
 vaadin-checkbox {
     font-weight: bold;
 }
+
+.storyteller {
+	font-weight: bold;
+}
+
+.logo {
+	margin:10px;
+}
+
+.card {
+	object-fit: scale-down;
+	width: 150px;
+    height: 220px;
+	/* width: 12vw;
+	height: 17.58vh;
+	*/
+}
+
+.messagingArea {
+	margin: 10px;
+	height: 100vh;
+}
+
+.gameArea {
+	margin: 10px;
+}

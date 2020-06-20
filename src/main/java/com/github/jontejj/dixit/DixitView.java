@@ -17,6 +17,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
@@ -24,8 +25,10 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.FlexLayout.FlexDirection;
 import com.vaadin.flow.component.orderedlayout.FlexLayout.FlexWrap;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
@@ -60,38 +63,26 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	private FlexLayout left;
 	private FlexLayout right;
 
+	private HorizontalLayout summarizationView;
+
 	public DixitView(@Autowired Games games)
 	{
 		left = new FlexLayout();
+		left.setFlexWrap(FlexWrap.WRAP);
 		right = new FlexLayout();
 		right.setFlexDirection(FlexDirection.ROW_REVERSE);
-		add(left, right);
-		// setFlexDirection(FlexDirection.COLUMN);
-		// setFlexWrap(FlexWrap.WRAP);
+		SplitLayout splitLayout = new SplitLayout(left, right);
+		splitLayout.setSplitterPosition(70);
+		splitLayout.setSizeFull();
+		add(splitLayout);
+		// add(left, right);
 		this.games = games;
-		// String gameId = firstNonNull(vaadinRequest.getParameter("game"), UUID.randomUUID().toString());
-		// Dixit game = games.getOrCreate(gameId);
-		// VerticalLayout todosList = new VerticalLayout(); // (1)
-		Image img = new Image(BUCKET_BASEPATH + "1.png", "1.png");
-		// todosList.add(img);
 
 		// gameIdLabel = new Label(this.gameId);
 		// gameIdLabel.setTitle("Game id");
 
-		// waitUntilAllPlayersHaveJoined();
-		// TextField taskField = new TextField(); // (2)
-		// taskField.setLabel("My label");
-		// taskField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-		// Button addButton = new Button("Add"); // (3)
-		// addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		// addButton.addClickShortcut(Key.ENTER);
-		// addButton.addClickListener(click -> {
-		// // (4)
-		// Checkbox checkbox = new Checkbox(taskField.getValue());
-		// todosList.add(checkbox);
-		// });
-		// new HorizontalLayout(taskField, addButton)
 		H1 logo = new H1("Dixit");
+		logo.addClassName("logo");
 		logo.addClickListener(e -> {
 			left.removeAll();
 			right.removeAll();
@@ -149,7 +140,6 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			createdGame.desiredAmountOfPlayers = desiredAmountOfPlayers.getValue();
 			getUI().get().navigate(this.gameId);
 			left.remove(createGameArea);
-			// addJoinUI();
 		});
 		createGameArea.add(desiredAmountOfPlayers, createButton);
 		left.add(createGameArea);
@@ -192,15 +182,16 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		}
 
 		gameArea = new FlexLayout();
+		gameArea.addClassName("gameArea");
+		gameArea.setFlexWrap(FlexWrap.NOWRAP);
 		gameArea.setFlexDirection(FlexDirection.COLUMN);
 
 		gameArea.add(new Label("My name: " + me.player.name));
-		gameArea.add(new Label("Scores"));
+		gameArea.add(new Label("Scores:"));
 		for(Participant player : currentGame.players)
 		{
 			gameArea.add(new Label(player.player.name + " : " + player.score));
 		}
-		// Players - score
 		left.add(gameArea);
 	}
 
@@ -209,44 +200,36 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		FlexLayout messagingArea = new FlexLayout();
 		messagingArea.setFlexDirection(FlexDirection.COLUMN);
 
-		// Input chatMessage = new Input();
-		// chatMessage.addShortcut(Key.ENTER);
 		TextField chatMessageSender = new TextField();
 		chatMessageSender.addKeyUpListener(Key.ENTER, (e) -> {
-			currentGame.broadcast(new ChatMessageEvent(me.player, chatMessageSender.getValue()));
+			String message = chatMessageSender.getValue();
+			if(message.isBlank())
+				return;
+
+			currentGame.broadcast(new ChatMessageEvent(me.player, message));
+			chatMessageSender.clear();
 		});
-		// (message) -> currentGame.broadcast(new ChatMessageEvent(message)));
-		// Shortcut.add(chatMessageSender, Key.ENTER, () -> {
-		// currentGame.broadcast(new ChatMessageEvent(chatMessageSender.getValue()));
-		// });
 		chatMessageSender.setLabel("Send message");
 
-		// Button sendChatMessage = new Button("Send chat message");
-		// sendChatMessage.addClickListener(e -> {
-		// ;
-		// });
 		messagingArea.add(chatMessageSender, messages);
-		right.add(messagingArea);
+		Scroller scroller = new Scroller(messagingArea);
+		scroller.addClassName("messagingArea");
+		right.add(scroller);
 	}
 
 	public void receiveEvent(GameEvent event)
 	{
-		// String message = event.toString();
-		// if(getUI().map(UI::i) isAttached())
+		// Must lock the session to execute logic safely
+		try
 		{
-			// Must lock the session to execute logic safely
-			try
-			{
-				getUI().orElseThrow().access(() -> {
-					// addSystemMessage(message);
-					event.executeInternally(DixitView.this);
-				}).get();
-			}
-			catch(InterruptedException | ExecutionException e)
-			{
-				getUI().orElseThrow().access(() -> Notification.show("Error occured while processing event: " + event + " :" + e));
+			getUI().orElseThrow().access(() -> {
+				event.executeInternally(DixitView.this);
+			}).get();
+		}
+		catch(InterruptedException | ExecutionException e)
+		{
+			getUI().orElseThrow().access(() -> Notification.show("Error occured while processing event: " + event + " :" + e));
 
-			}
 		}
 	}
 
@@ -329,22 +312,11 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		sentenceField.addKeyUpListener(Key.ENTER, (e) -> {
 			if(pickedCard.get() != null)
 			{
-				try
-				{
-					currentGame.currentStoryTeller.makeUpSentance(sentenceField.getValue(), pickedCard.get());
-				}
-				catch(InvalidCardPicked invalidCard)
-				{
-					Notification.show(invalidCard.getMessage());
-					return;
-				}
-				currentGame.broadcast(new SentanceCreated(sentenceField.getValue()));
+				pickCardAndSentenceAsStoryTeller(pickedCard.get(), sentenceField.getValue());
 				left.remove(sentenceArea);
+				return;
 			}
-			else
-			{
-				sentence.set(sentenceField.getValue());
-			}
+			sentence.set(sentenceField.getValue());
 		});
 
 		sentenceArea.add(sentenceField);
@@ -352,16 +324,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		showCardsWithPicker(me.cards, card -> {
 			if(sentence.get() != null)
 			{
-				try
-				{
-					currentGame.currentStoryTeller.makeUpSentance(sentenceField.getValue(), card);
-				}
-				catch(InvalidCardPicked invalidCard)
-				{
-					Notification.show(invalidCard.getMessage());
-					return;
-				}
-				currentGame.broadcast(new SentanceCreated(sentenceField.getValue()));
+				pickCardAndSentenceAsStoryTeller(card, sentence.get());
 				left.remove(sentenceArea);
 			}
 			else
@@ -369,6 +332,18 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 				pickedCard.set(card);
 			}
 		});
+	}
+
+	private void pickCardAndSentenceAsStoryTeller(Card chosenCard, String message)
+	{
+		try
+		{
+			currentGame.makeUpSentance(message, chosenCard);
+		}
+		catch(InvalidCardPicked | EmptyDeck invalidCard)
+		{
+			Notification.show(invalidCard.getMessage());
+		}
 	}
 
 	public void showCardsWithPicker(List<? extends Card> cardsToPickAmongst, Consumer<Card> pickedCardAction)
@@ -379,9 +354,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		cardArea.setFlexWrap(FlexWrap.WRAP);
 		for(Card card : cardsToPickAmongst)
 		{
-			Image cardImage = new Image(BUCKET_BASEPATH + card.number + ".png", card.toString());
-			cardImage.setMaxWidth("200px");
-			cardImage.setMaxHeight("293px");
+			Image cardImage = imageFor(card);
 			cardImage.addClickListener((e) -> {
 				pickedCardAction.accept(card);
 				left.remove(cardArea);
@@ -391,10 +364,17 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		left.add(cardArea);
 	}
 
+	private Image imageFor(Card card)
+	{
+		Image cardImage = new Image(BUCKET_BASEPATH + card.number + ".png", card.toString());
+		cardImage.addClassName("card");
+		return cardImage;
+	}
+
 	public void showPickedCardsToPlayersAndAskToPickStoryTellersCard()
 	{
 		List<PickedCard> givenCards = currentGame.currentStoryTeller.getGivenCards();
-		if(me.equals(currentGame.currentStoryTeller.participant))
+		if(me.player.equals(currentGame.currentStoryTeller.player))
 		{
 			addSystemMessage("Here are the cards the other players picked");
 			showCardsWithPicker(givenCards, (card) -> {
@@ -403,11 +383,11 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		else
 		{
 			addSystemMessage("Guess which card the story teller played");
-			givenCards.removeIf(card -> card.pickedBy.player.equals(me.player));
+			givenCards.removeIf(card -> card.pickedBy.equals(me.player));
 			showCardsWithPicker(givenCards, pickedCard -> {
 				try
 				{
-					currentGame.currentStoryTeller.betOnStoryTellersCard(pickedCard, me);
+					currentGame.currentStoryTeller.betOnStoryTellersCard(pickedCard, me.player);
 					currentGame.broadcast(new PlayerGuessedStoryTellerCard(me.player));
 				}
 				catch(InvalidCardPicked e)
@@ -424,5 +404,40 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		{
 			left.remove(cardArea);
 		}
+	}
+
+	public void showSummarization(RoundSummarization summarization)
+	{
+		if(summarizationView != null)
+		{
+			this.left.remove(summarizationView);
+		}
+		summarizationView = new HorizontalLayout();
+		VerticalLayout scoresView = new VerticalLayout();
+		scoresView.add(new H4("Round summarization"));
+		for(Participant p : currentGame.players)
+		{
+			// TODO: change to a table view
+			scoresView.add(new Label(p.player.name + ": " + summarization.getTotalScoreIncreseForPlayer(p.player)));
+		}
+		HorizontalLayout pickedCardsView = new HorizontalLayout();
+		summarization.forEachPickedCard((pickedCard, playersWhoGuessedIt) -> {
+			VerticalLayout pickedCardView = new VerticalLayout();
+			Label playedBy = new Label("Played by: " + pickedCard.pickedBy);
+			if(pickedCard.pickedBy.equals(summarization.getStoryTeller()))
+			{
+				playedBy.addClassName("storyteller");
+			}
+			pickedCardView.add(playedBy);
+			pickedCardView.add(new Label("Picked by: " + playersWhoGuessedIt));
+			pickedCardView.add(imageFor(pickedCard));
+			pickedCardsView.add(pickedCardView);
+		});
+		pickedCardsView.add(new Button("Close", e -> {
+			this.left.remove(summarizationView);
+			summarizationView = null;
+		}));
+		summarizationView.add(scoresView, pickedCardsView);
+		this.left.add(summarizationView);
 	}
 }

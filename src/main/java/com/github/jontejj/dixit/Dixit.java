@@ -27,6 +27,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.github.jontejj.dixit.Participant.InvalidCardPicked;
+
 /**
  * A server side instance of this represents one ongoing game of Dixit.
  * Based on https://boardgamegeek.com/boardgame/39856/dixit
@@ -79,7 +81,6 @@ public class Dixit
 		// This can't simply check for O as players can rejoin
 		if(isAllNeededPlayersAssigned())
 		{
-			// Let the game begin
 			play();
 		}
 		return participant;
@@ -138,6 +139,25 @@ public class Dixit
 		}
 	}
 
+	private StoryTeller pickStoryTeller()
+	{
+		currentStoryTellerIndex += 1;
+		currentStoryTellerIndex = currentStoryTellerIndex % players.size();
+		Participant participant = players.get(currentStoryTellerIndex);
+		broadcast(new StoryTellerPicked(participant.player));
+		return new StoryTeller(participant.player);
+	}
+
+	void makeUpSentance(String theSentence, Card aChosenCard) throws InvalidCardPicked, EmptyDeck
+	{
+		Participant storyTellerParticipant = players.get(currentStoryTellerIndex);
+		if(!storyTellerParticipant.cards.remove(aChosenCard))
+			throw new InvalidCardPicked("The chosen card was not in the story tellers hand");
+		currentStoryTeller.makeUpSentance(theSentence, aChosenCard);
+		broadcast(new SentanceCreated(theSentence));
+		giveOneCardToPlayer(storyTellerParticipant);
+	}
+
 	// Adds a new card to a player's hand after they have picking a card
 	void giveOneCardToPlayer(Participant player) throws EmptyDeck
 	{
@@ -156,18 +176,15 @@ public class Dixit
 		return deck.isEmpty();
 	}
 
-	private StoryTeller pickStoryTeller()
-	{
-		currentStoryTellerIndex += 1;
-		currentStoryTellerIndex = currentStoryTellerIndex % players.size();
-		Participant participant = players.get(currentStoryTellerIndex);
-		broadcast(new StoryTellerPicked(participant.player));
-		return new StoryTeller(participant);
-	}
-
 	public void distributeScoresAndPickNewStoryTeller()
 	{
-		currentStoryTeller.distributeScores();
+		RoundSummarization roundSummarization = currentStoryTeller.summarizeRound();
+
+		for(Participant p : players)
+		{
+			p.score += roundSummarization.getTotalScoreIncreseForPlayer(p.player);
+		}
+		broadcast(new RoundSummarizedEvent(roundSummarization));
 		if(outOfTurns())
 		{
 			Participant winner = null;

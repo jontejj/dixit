@@ -45,7 +45,7 @@ public class Participant
 		if(!cards.contains(chosenCard))
 			throw new InvalidCardPicked(chosenCard + " was not among this player's cards.");
 		cards.remove(chosenCard);
-		return new PickedCard(chosenCard, this);
+		return new PickedCard(chosenCard, this.player);
 	}
 
 	@Override

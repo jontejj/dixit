@@ -26,7 +26,6 @@ public class GameFinished extends GameEvent
 	@Override
 	public void execute(DixitView view)
 	{
-
 	}
 
 	@Override
