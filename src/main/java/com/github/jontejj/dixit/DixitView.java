@@ -34,11 +34,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
 @Route("")
 @CssImport("styles/shared-styles.css")
 @Push
+@PreserveOnRefresh
 public class DixitView extends HorizontalLayout implements HasUrlParameter<String>
 {
 	enum Selectable
@@ -123,7 +125,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		{
 			addCreateGameUI();
 		}
-		else
+		else if(me == null)
 		{
 			addJoinUI();
 		}
