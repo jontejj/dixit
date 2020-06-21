@@ -11,6 +11,8 @@ import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.github.jontejj.dixit.Participant.InvalidCardPicked;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -41,6 +43,7 @@ import com.vaadin.flow.router.Route;
 @CssImport("styles/shared-styles.css")
 @Push
 @PreserveOnRefresh
+// TODO: Introduce PWA? @PWA(name = "", shortName = "")
 public class DixitView extends HorizontalLayout implements HasUrlParameter<String>
 {
 	enum Selectable
@@ -135,28 +138,39 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	{
 		VerticalLayout createGameArea = new VerticalLayout();
 		IntegerField desiredAmountOfPlayers = new IntegerField();
+		desiredAmountOfPlayers.setId(CssId.DESIRED_AMOUNT_OF_PLAYERS);
 		desiredAmountOfPlayers.setLabel("Nr of players");
 		desiredAmountOfPlayers.setMin(2);
 		desiredAmountOfPlayers.setMax(Dixit.CARDS_IN_DECK / Dixit.CARDS_IN_HAND);
 		desiredAmountOfPlayers.setValue(5);
+		desiredAmountOfPlayers.focus();
+		// desiredAmountOfPlayers.addKeyUpListener(key, listener, modifiers)
 		Button createButton = new Button("Create Game");
 		createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		createButton.addClickListener(e -> {
+		createButton.addClickShortcut(Key.ENTER);
+		createButton.addClickListener(createGame(createGameArea, desiredAmountOfPlayers));
+		createGameArea.add(desiredAmountOfPlayers, createButton);
+		left.add(createGameArea);
+	}
+
+	private ComponentEventListener<ClickEvent<Button>> createGame(VerticalLayout createGameArea, IntegerField desiredAmountOfPlayers)
+	{
+		return e -> {
 			this.setGameId(UUID.randomUUID().toString());
 			Dixit createdGame = games.getOrCreate(this.gameId);
 			createdGame.desiredAmountOfPlayers = desiredAmountOfPlayers.getValue();
 			getUI().get().navigate(this.gameId);
 			left.remove(createGameArea);
-		});
-		createGameArea.add(desiredAmountOfPlayers, createButton);
-		left.add(createGameArea);
+		};
 	}
 
 	private void addJoinUI()
 	{
 		VerticalLayout joinArea = new VerticalLayout();
 		TextField playerName = new TextField();
+		playerName.setId(CssId.PLAYER_NAME);
 		playerName.setLabel("My player name");
+		playerName.focus();
 
 		Button joinButton = new Button("Join");
 		joinButton.addClickShortcut(Key.ENTER);

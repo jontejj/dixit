@@ -1,4 +1,4 @@
-package com.example;
+package com.github.jontejj.dixit;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import org.junit.Assert;

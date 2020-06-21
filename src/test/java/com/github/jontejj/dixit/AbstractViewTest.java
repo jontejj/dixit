@@ -1,4 +1,4 @@
-package com.example;
+package com.github.jontejj.dixit;
 
 import com.vaadin.flow.theme.AbstractTheme;
 import com.vaadin.testbench.ScreenshotOnFailureRule;
