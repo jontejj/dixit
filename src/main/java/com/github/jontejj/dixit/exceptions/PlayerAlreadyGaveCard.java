@@ -12,15 +12,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.exceptions;
 
 import com.vaadin.flow.server.ServiceException;
 
-public class AllPlayersAlreadyJoined extends ServiceException
+public class PlayerAlreadyGaveCard extends ServiceException
 {
+	private static final long serialVersionUID = 1L;
 
-	public AllPlayersAlreadyJoined()
+	public PlayerAlreadyGaveCard()
 	{
-		super("All players have already joined");
+		super("Card was already picked by you");
 	}
 }

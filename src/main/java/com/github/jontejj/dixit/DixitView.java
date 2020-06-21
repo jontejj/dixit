@@ -10,7 +10,17 @@ import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.github.jontejj.dixit.Participant.InvalidCardPicked;
+import com.github.jontejj.dixit.events.ChatMessageEvent;
+import com.github.jontejj.dixit.events.GameEvent;
+import com.github.jontejj.dixit.events.PlayerGuessedStoryTellerCard;
+import com.github.jontejj.dixit.events.PlayerPickedMatchingCard;
+import com.github.jontejj.dixit.exceptions.AllPlayersAlreadyJoined;
+import com.github.jontejj.dixit.exceptions.EmptyDeck;
+import com.github.jontejj.dixit.exceptions.EmptyPlayerName;
+import com.github.jontejj.dixit.exceptions.GameNotConfiguredYet;
+import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
+import com.github.jontejj.dixit.exceptions.PlayerAlreadyGaveCard;
+import com.github.jontejj.dixit.exceptions.PlayerNameAlreadyTaken;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
@@ -44,8 +54,10 @@ import com.vaadin.flow.router.Route;
 @Push
 @PreserveOnRefresh
 // TODO: Introduce PWA? @PWA(name = "", shortName = "")
-public class DixitView extends HorizontalLayout implements HasUrlParameter<String>
+public class DixitView extends HorizontalLayout implements HasUrlParameter<String>, DixitCallback
 {
+	private static final long serialVersionUID = 1L;
+
 	enum Selectable
 	{
 		YES,
@@ -189,13 +201,13 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			left.remove(joinArea);
 			playerName.setEnabled(false);
 			addMessagingArea();
-			repaintGameInfoArea();
+			gameInfoChanged();
 		});
 		joinArea.add(playerName, joinButton);
 		left.add(joinArea);
 	}
 
-	void repaintGameInfoArea()
+	public void gameInfoChanged()
 	{
 		if(gameArea != null)
 		{
@@ -258,13 +270,13 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		}
 	}
 
-	void addMessage(String message)
+	public void addMessage(String message)
 	{
 		Label m = new Label(message);
 		messages.addComponentAsFirst(m);
 	}
 
-	void addSystemMessage(String message)
+	public void addSystemMessage(String message)
 	{
 		if(message.isEmpty())
 			return;
@@ -435,7 +447,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		}
 	}
 
-	public void showSummarization(RoundSummarization summarization)
+	public void summarizationReceived(RoundSummarization summarization)
 	{
 		if(summarizationView != null)
 		{
@@ -468,5 +480,69 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		}));
 		summarizationView.add(scoresView, pickedCardsView);
 		this.left.add(summarizationView);
+	}
+
+	@Override
+	public void playerGuessedStoryTellerCard()
+	{
+		if(me.player.equals(currentGame.currentStoryTeller.player))
+		{
+			if(currentGame.currentStoryTeller.hasCollectedAllGuesses())
+			{
+				currentGame.distributeScoresAndPickNewStoryTeller();
+			}
+		}
+	}
+
+	@Override
+	public void playerPickedMatchingCard(Player playerThatPicked)
+	{
+		if(currentGame.currentStoryTeller.getNumberOfGivenCards() == currentGame.players.size())
+		{
+			// Show all picked cards to all players, story-teller (should only be able to see)
+			showPickedCardsToPlayersAndAskToPickStoryTellersCard();
+		}
+	}
+
+	@Override
+	public void sentenceCreated(String message)
+	{
+		if(me.player.equals(currentGame.currentStoryTeller.player))
+		{
+			addSystemMessage("Roll your thumbs while other players are picking a card to match your sentence");
+		}
+		else
+		{
+			Player storyTeller = currentGame.currentStoryTeller.player;
+			addSystemMessage(storyTeller + " says: " + message + ". Pick one of your cards that you think matches");
+			showCardsWithPicker(me.cards, card -> {
+				try
+				{
+					// TODO: these operations should be done inside of Dixit
+					PickedCard pickedCard = me.pickCardThatMatchesTheStoryTellers(card);
+					currentGame.currentStoryTeller.givePickedCard(pickedCard);
+					currentGame.broadcast(new PlayerPickedMatchingCard(me.player));
+					me.cards.remove(card);
+					currentGame.giveOneCardToPlayer(me);
+				}
+				catch(InvalidCardPicked | EmptyDeck | PlayerAlreadyGaveCard error)
+				{
+					Notification.show(error.getMessage());
+				}
+			}, Selectable.YES);
+		}
+	}
+
+	@Override
+	public void storyTellerPicked(Player newStoryTeller)
+	{
+		if(me.player.equals(newStoryTeller))
+		{
+			askForSentence();
+		}
+		else
+		{
+			addSystemMessage("Roll your thumbs while the story teller makes up a sentence");
+		}
 	}
 }

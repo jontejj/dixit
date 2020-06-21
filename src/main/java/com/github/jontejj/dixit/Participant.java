@@ -18,18 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.vaadin.flow.server.ServiceException;
+import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
 
 public class Participant
 {
-	public static class InvalidCardPicked extends ServiceException
-	{
-		public InvalidCardPicked(String message)
-		{
-			super(message);
-		}
-	}
-
 	final Player player;
 	final List<Card> cards = new ArrayList<>();
 

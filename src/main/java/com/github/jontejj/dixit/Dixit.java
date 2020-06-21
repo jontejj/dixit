@@ -27,7 +27,18 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.github.jontejj.dixit.Participant.InvalidCardPicked;
+import com.github.jontejj.dixit.events.GameEvent;
+import com.github.jontejj.dixit.events.GameFinished;
+import com.github.jontejj.dixit.events.JoinEvent;
+import com.github.jontejj.dixit.events.LeaveEvent;
+import com.github.jontejj.dixit.events.RoundSummarizedEvent;
+import com.github.jontejj.dixit.events.SentanceCreated;
+import com.github.jontejj.dixit.events.StoryTellerPicked;
+import com.github.jontejj.dixit.exceptions.AllPlayersAlreadyJoined;
+import com.github.jontejj.dixit.exceptions.EmptyDeck;
+import com.github.jontejj.dixit.exceptions.GameNotConfiguredYet;
+import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
+import com.github.jontejj.dixit.exceptions.PlayerNameAlreadyTaken;
 
 /**
  * A server side instance of this represents one ongoing game of Dixit.

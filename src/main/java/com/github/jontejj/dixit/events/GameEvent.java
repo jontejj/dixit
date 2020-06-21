@@ -12,16 +12,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-import com.vaadin.flow.server.ServiceException;
+import com.github.jontejj.dixit.DixitCallback;
 
-public class GameNotConfiguredYet extends ServiceException
+public abstract class GameEvent
 {
+	public abstract void execute(DixitCallback callback);
 
-	public GameNotConfiguredYet()
+	public void executeInternally(DixitCallback callback)
 	{
-		super("Game not configured correctly");
+		callback.addSystemMessage(toString());
+		execute(callback);
 	}
-
 }

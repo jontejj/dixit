@@ -12,26 +12,29 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
 import java.util.function.Consumer;
+
+import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.Participant;
 
 public class JoinEvent extends GameEvent
 {
 	private final Participant playerWhoJoined;
 	private final Consumer<GameEvent> listenerThatJoined;
 
-	protected JoinEvent(Participant playerWhoJoined, Consumer<GameEvent> listenerThatJoined)
+	public JoinEvent(Participant playerWhoJoined, Consumer<GameEvent> listenerThatJoined)
 	{
 		this.playerWhoJoined = playerWhoJoined;
 		this.listenerThatJoined = listenerThatJoined;
 	}
 
 	@Override
-	public void execute(DixitView dixitView)
+	public void execute(DixitCallback dixitView)
 	{
 		// TODO: optimize and only redraw updates scores/new players
-		dixitView.repaintGameInfoArea();
+		dixitView.gameInfoChanged();
 	}
 
 	@Override

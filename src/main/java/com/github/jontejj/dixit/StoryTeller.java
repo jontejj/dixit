@@ -21,8 +21,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import com.github.jontejj.dixit.Participant.InvalidCardPicked;
 import com.github.jontejj.dixit.RoundSummarization.Scores;
+import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
+import com.github.jontejj.dixit.exceptions.PlayerAlreadyGaveCard;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;

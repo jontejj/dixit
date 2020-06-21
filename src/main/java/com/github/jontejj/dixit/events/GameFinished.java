@@ -12,15 +12,29 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-import com.vaadin.flow.server.ServiceException;
+import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.Player;
 
-public class PlayerNameAlreadyTaken extends ServiceException
+public class GameFinished extends GameEvent
 {
-	public PlayerNameAlreadyTaken()
+	private final Player winner;
+
+	public GameFinished(Player winner)
 	{
-		super("Player name already taken");
+		this.winner = winner;
+	}
+
+	@Override
+	public void execute(DixitCallback callback)
+	{
+	}
+
+	@Override
+	public String toString()
+	{
+		return winner + " won";
 	}
 
 }

@@ -12,26 +12,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.exceptions;
 
-public class GameFinished extends GameEvent
+import com.vaadin.flow.server.ServiceException;
+
+public class EmptyPlayerName extends ServiceException
 {
-	private final Player winner;
+	private static final long serialVersionUID = 1L;
 
-	public GameFinished(Player winner)
+	public EmptyPlayerName()
 	{
-		this.winner = winner;
+		super("Player name can't be empty");
 	}
-
-	@Override
-	public void execute(DixitView view)
-	{
-	}
-
-	@Override
-	public String toString()
-	{
-		return winner + " won";
-	}
-
 }

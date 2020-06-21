@@ -12,33 +12,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.exceptions;
 
-public interface DixitCallback
+import com.vaadin.flow.server.ServiceException;
+
+public class PlayerNameAlreadyTaken extends ServiceException
 {
-	/**
-	 * Adds a message from the system
-	 */
-	void addSystemMessage(String message);
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Adds a message from a user
-	 */
-	void addMessage(String message);
-
-	/**
-	 * Joined players changed, Scores changed etc
-	 */
-	void gameInfoChanged();
-
-	void playerGuessedStoryTellerCard();
-
-	void playerPickedMatchingCard(Player playerThatPicked);
-
-	void summarizationReceived(RoundSummarization summarization);
-
-	void sentenceCreated(String message);
-
-	void storyTellerPicked(Player newStoryTeller);
+	public PlayerNameAlreadyTaken()
+	{
+		super("Player name already taken");
+	}
 
 }

@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.github.jontejj.dixit.events.GameEvent;
+import com.github.jontejj.dixit.events.JoinEvent;
+
 class EventSaver
 {
 	private final List<GameEvent> eventsForLatestGame = Collections.synchronizedList(new LinkedList<>());

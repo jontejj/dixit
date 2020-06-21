@@ -12,34 +12,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.exceptions;
 
-public class StoryTellerPicked extends GameEvent
+import com.vaadin.flow.server.ServiceException;
+
+public class InvalidCardPicked extends ServiceException
 {
-	private final Player newStoryTeller;
+	private static final long serialVersionUID = 1L;
 
-	public StoryTellerPicked(Player newStoryTeller)
+	public InvalidCardPicked(String message)
 	{
-		this.newStoryTeller = newStoryTeller;
-	}
-
-	@Override
-	public void execute(DixitView view)
-	{
-		view.removeCardArea();
-		if(view.me.player.equals(newStoryTeller))
-		{
-			view.askForSentence();
-		}
-		else
-		{
-			view.addSystemMessage("Roll your thumbs while the story teller makes up a sentence");
-		}
-	}
-
-	@Override
-	public String toString()
-	{
-		return newStoryTeller + " was picked as story teller";
+		super(message);
 	}
 }

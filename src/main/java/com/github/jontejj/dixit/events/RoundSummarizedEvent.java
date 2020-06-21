@@ -12,35 +12,33 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-public class ChatMessageEvent extends GameEvent
+import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.RoundSummarization;
+
+public class RoundSummarizedEvent extends GameEvent
 {
-	private final Player sender;
-	private final String message;
 
-	ChatMessageEvent(Player sender, String message)
+	private final RoundSummarization summarization;
+
+	public RoundSummarizedEvent(RoundSummarization summarization)
 	{
-		this.sender = sender;
-		this.message = message;
-
-	}
-
-	public void executeInternally(DixitView dixit)
-	{
-		dixit.addMessage(toString());
-		execute(dixit);
+		this.summarization = summarization;
 	}
 
 	@Override
-	public void execute(DixitView dixit)
+	public void execute(DixitCallback callback)
 	{
-
+		// refresh scores view as scores have been updated
+		callback.gameInfoChanged();
+		// Show summary of the last story tellers round
+		callback.summarizationReceived(summarization);
 	}
 
 	@Override
 	public String toString()
 	{
-		return sender + ": " + message;
+		return "Round completed";
 	}
 }

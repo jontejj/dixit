@@ -12,14 +12,28 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-import com.vaadin.flow.server.ServiceException;
+import com.github.jontejj.dixit.DixitCallback;
 
-public class EmptyDeck extends ServiceException
+public class SentanceCreated extends GameEvent
 {
-	public EmptyDeck()
+	private final String message;
+
+	public SentanceCreated(String message)
 	{
-		super("No more cards in the deck");
+		this.message = message;
+	}
+
+	@Override
+	public void execute(DixitCallback callback)
+	{
+		callback.sentenceCreated(message);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

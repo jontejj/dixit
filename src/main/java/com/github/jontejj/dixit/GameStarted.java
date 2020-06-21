@@ -14,11 +14,13 @@
  */
 package com.github.jontejj.dixit;
 
+import com.github.jontejj.dixit.events.GameEvent;
+
 public class GameStarted extends GameEvent
 {
 
 	@Override
-	public void execute(DixitView dixit)
+	public void execute(DixitCallback dixit)
 	{
 
 	}

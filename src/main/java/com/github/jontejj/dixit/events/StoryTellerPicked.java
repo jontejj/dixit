@@ -12,14 +12,29 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-import com.vaadin.flow.server.ServiceException;
+import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.Player;
 
-public class PlayerAlreadyGaveCard extends ServiceException
+public class StoryTellerPicked extends GameEvent
 {
-	public PlayerAlreadyGaveCard()
+	private final Player newStoryTeller;
+
+	public StoryTellerPicked(Player newStoryTeller)
 	{
-		super("Card was already picked by you");
+		this.newStoryTeller = newStoryTeller;
+	}
+
+	@Override
+	public void execute(DixitCallback callback)
+	{
+		callback.storyTellerPicked(newStoryTeller);
+	}
+
+	@Override
+	public String toString()
+	{
+		return newStoryTeller + " was picked as story teller";
 	}
 }

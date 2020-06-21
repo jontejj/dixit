@@ -12,31 +12,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.exceptions;
 
-public class PlayerPickedMatchingCard extends GameEvent
+import com.vaadin.flow.server.ServiceException;
+
+public class EmptyDeck extends ServiceException
 {
-	private final Player playerThatPicked;
+	private static final long serialVersionUID = 1L;
 
-	PlayerPickedMatchingCard(Player player)
+	public EmptyDeck()
 	{
-		this.playerThatPicked = player;
-
-	}
-
-	@Override
-	public void execute(DixitView view)
-	{
-		if(view.currentGame.currentStoryTeller.getNumberOfGivenCards() == view.currentGame.players.size())
-		{
-			// Show all picked cards to all players, story-teller (should only be able to see)
-			view.showPickedCardsToPlayersAndAskToPickStoryTellersCard();
-		}
-	}
-
-	@Override
-	public String toString()
-	{
-		return playerThatPicked.toString() + " picked a card";
+		super("No more cards in the deck");
 	}
 }

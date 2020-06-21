@@ -12,15 +12,30 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-public abstract class GameEvent
+import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.Player;
+
+public class PlayerGuessedStoryTellerCard extends GameEvent
 {
-	public abstract void execute(DixitView view);
 
-	public void executeInternally(DixitView view)
+	private final Player playerThatGuessed;
+
+	public PlayerGuessedStoryTellerCard(Player playerThatGuessed)
 	{
-		view.addSystemMessage(toString());
-		execute(view);
+		this.playerThatGuessed = playerThatGuessed;
+	}
+
+	@Override
+	public void execute(DixitCallback callback)
+	{
+		callback.playerGuessedStoryTellerCard();
+	}
+
+	@Override
+	public String toString()
+	{
+		return playerThatGuessed + " guessed on a card";
 	}
 }

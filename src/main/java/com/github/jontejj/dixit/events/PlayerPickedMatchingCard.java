@@ -1,4 +1,4 @@
-/* Copyright 2017 jonatan.jonsson
+/* Copyright 2020 jonatanjonsson
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -12,25 +12,30 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.jontejj.dixit;
+package com.github.jontejj.dixit.events;
 
-public class LeaveEvent extends GameEvent
+import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.Player;
+
+public class PlayerPickedMatchingCard extends GameEvent
 {
-	private final Participant playerWhoLeft;
+	private final Player playerThatPicked;
 
-	public LeaveEvent(Participant participant)
+	public PlayerPickedMatchingCard(Player player)
 	{
-		this.playerWhoLeft = participant;
+		this.playerThatPicked = player;
+
 	}
 
 	@Override
-	public void execute(DixitView dixit)
+	public void execute(DixitCallback callback)
 	{
+		callback.playerPickedMatchingCard(playerThatPicked);
 	}
 
 	@Override
 	public String toString()
 	{
-		return playerWhoLeft + " left";
+		return playerThatPicked.toString() + " picked a card";
 	}
 }
