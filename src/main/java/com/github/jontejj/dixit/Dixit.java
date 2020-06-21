@@ -14,6 +14,7 @@
  */
 package com.github.jontejj.dixit;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
@@ -39,6 +40,7 @@ import com.github.jontejj.dixit.exceptions.EmptyDeck;
 import com.github.jontejj.dixit.exceptions.GameNotConfiguredYet;
 import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
 import com.github.jontejj.dixit.exceptions.PlayerNameAlreadyTaken;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * A server side instance of this represents one ongoing game of Dixit.
@@ -49,20 +51,30 @@ public class Dixit
 	static final int CARDS_IN_DECK = 84;
 	static final int CARDS_IN_HAND = 6;
 	private static final int UNDEFINED = -1;
-	List<Participant> players = new ArrayList<>();
+	final List<Participant> players = new CopyOnWriteArrayList<>();
 
 	private Deque<Card> deck = null;
 
 	int desiredAmountOfPlayers = UNDEFINED;
-	private int currentStoryTellerIndex = 0;
+	private volatile int currentStoryTellerIndex = 0;
 
 	// TODO(jontejj): benchmark and test to see if more threads are needed
-	static ExecutorService executorService = Executors.newSingleThreadExecutor();
+	private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+	static
+	{
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+			@Override
+			public void run()
+			{
+				MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(1));
+			}
+		});
+	}
 
 	private List<Consumer<GameEvent>> consumers = new CopyOnWriteArrayList<>();
 
 	private EventSaver saver = new EventSaver();
-	StoryTeller currentStoryTeller;
+	volatile StoryTeller currentStoryTeller;
 
 	Dixit()
 	{
@@ -100,6 +112,11 @@ public class Dixit
 	public boolean isAllNeededPlayersAssigned()
 	{
 		return players.size() == desiredAmountOfPlayers;
+	}
+
+	public void rejoin(Consumer<GameEvent> listener)
+	{
+		consumers.add(listener);
 	}
 
 	public void leave(Participant participant)

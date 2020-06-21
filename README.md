@@ -71,6 +71,12 @@ Project follow the Maven's [standard directory layout structure](https://maven.a
 
 If you run application from a command line, remember to prepend a `mvn` to the command.
 
+Remember to set jdk 11 as java home
+
+```
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/openjdk-11.jdk/Contents/Home/"
+```
+
 ## Hot swapping (as Vaadin supports it pretty well)
 [https://dzone.com/articles/hot-swap-java-bytecode-on-runtime](https://dzone.com/articles/hot-swap-java-bytecode-on-runtime)
 

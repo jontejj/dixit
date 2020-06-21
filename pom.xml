@@ -13,7 +13,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<vaadin.version>14.2.1</vaadin.version>
 		<junit.jupiter.version>5.6.2</junit.jupiter.version>
-		
+
 		<!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=547340 -->
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 	</properties>
@@ -133,12 +133,29 @@
 			<version>${junit.jupiter.version}</version><!--$NO-MVN-MAN-VER$ -->
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.16.1</version><!--$NO-MVN-MAN-VER$ -->
+			<scope>test</scope>
+		</dependency>
 		<!-- <dependency> <groupId>org.vaadin.olli</groupId> <artifactId>clipboardhelper</artifactId> 
 			<version>1.1.1</version> </dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
@@ -148,12 +165,8 @@
 		</dependency>
 		<!-- <dependency> <groupId>io.github.bonigarcia</groupId> <artifactId>webdrivermanager</artifactId> 
 			<version>4.0.0</version> <scope>test</scope> </dependency> -->
-		<!-- <dependency>
-			<groupId>io.github.bonigarcia</groupId>
-			<artifactId>selenium-jupiter</artifactId>
-			<version>3.3.4</version>
-			<scope>test</scope>
-		</dependency>-->
+		<!-- <dependency> <groupId>io.github.bonigarcia</groupId> <artifactId>selenium-jupiter</artifactId> 
+			<version>3.3.4</version> <scope>test</scope> </dependency> -->
 		<dependency>
 			<groupId>io.github.bonigarcia</groupId>
 			<artifactId>webdrivermanager</artifactId>
@@ -177,6 +190,12 @@
 
 	<build>
 		<defaultGoal>spring-boot:run</defaultGoal>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -246,10 +265,29 @@
 
 	<profiles>
 		<profile>
+			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<vaadin.productionMode>false</vaadin.productionMode>
+				<spring.profiles.active>development</spring.profiles.active>
+			</properties>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-devtools</artifactId>
+					<optional>true</optional>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
 			<!-- Production mode is activated using -Pproduction -->
 			<id>production</id>
 			<properties>
 				<vaadin.productionMode>true</vaadin.productionMode>
+				<spring.profiles.active>production</spring.profiles.active>
 			</properties>
 
 			<dependencies>
@@ -286,7 +324,7 @@
 		</profile>
 
 		<profile>
-			<id>it</id>
+			<id>integration</id>
 			<build>
 				<plugins>
 					<plugin>

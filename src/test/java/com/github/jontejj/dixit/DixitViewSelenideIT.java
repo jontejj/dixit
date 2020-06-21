@@ -31,7 +31,9 @@ import com.codeborne.selenide.SelenideConfig;
 import com.codeborne.selenide.SelenideDriver;
 import com.codeborne.selenide.WebDriverRunner;
 
-public class DixitViewSelenideTest
+//@SpringBootTest
+//@ExtendWith(SpringExtension.class)
+public class DixitViewSelenideIT
 {
 	@Test
 	@Disabled
@@ -47,11 +49,12 @@ public class DixitViewSelenideTest
 	}
 
 	@Test
+	@Disabled("until graceful shutdowns can be done")
 	public void performanceTestDixit() throws InterruptedException
 	{
 		// try
 		// {
-		open("http://localhost");
+		open("http://localhost/dixit");
 		$("#" + CssId.DESIRED_AMOUNT_OF_PLAYERS).sendKeys(Keys.BACK_SPACE + "3" + Keys.ENTER);
 		$("#" + CssId.PLAYER_NAME).sendKeys("Dog" + Keys.ENTER);
 		String urlToJoin = WebDriverRunner.url();

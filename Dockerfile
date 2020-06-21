@@ -9,8 +9,7 @@ COPY src src
 COPY frontend frontend
 COPY package.json package.json
 COPY webpack.config.js webpack.config.js
-
-RUN mvn package -Pproduction --no-transfer-progress
+RUN mvn package -Pproduction,integration --no-transfer-progress
 
 # build modules distribution
 RUN jlink --verbose --add-modules java.base,java.logging,java.naming,java.desktop,java.management,java.security.jgss,java.instrument --no-header-files --no-man-pages --output "$JAVA_MINIMAL"

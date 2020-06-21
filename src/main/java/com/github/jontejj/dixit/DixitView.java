@@ -21,8 +21,10 @@ import com.github.jontejj.dixit.exceptions.GameNotConfiguredYet;
 import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
 import com.github.jontejj.dixit.exceptions.PlayerAlreadyGaveCard;
 import com.github.jontejj.dixit.exceptions.PlayerNameAlreadyTaken;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -48,12 +50,14 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.shared.communication.PushMode;
 
-@Route("")
+@Route("dixit")
 @CssImport("styles/shared-styles.css")
-@Push
+@Push(PushMode.MANUAL)
 @PreserveOnRefresh
-// TODO: Introduce PWA? @PWA(name = "", shortName = "")
+@PWA(name = "dixit", shortName = "dixit")
 public class DixitView extends HorizontalLayout implements HasUrlParameter<String>, DixitCallback
 {
 	private static final long serialVersionUID = 1L;
@@ -87,6 +91,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	private HorizontalLayout summarizationView;
 
+	private EventReceiver listener;
+
 	public DixitView(@Autowired Games games)
 	{
 		left = new FlexLayout();
@@ -119,9 +125,31 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		// add(gameLink(this.gameId));
 	}
 
+	@Override
+	protected void onAttach(AttachEvent attachEvent)
+	{
+		UI ui = attachEvent.getUI();
+		if(me != null)
+		{
+			listener = new EventReceiver(ui);
+			currentGame.rejoin(listener);
+		}
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent)
+	{
+		if(me != null)
+		{
+			currentGame.unregister(me, listener);
+			listener = null;
+		}
+	}
+
 	private void joinGame(String playerName, Dixit createdGame) throws GameNotConfiguredYet, AllPlayersAlreadyJoined, PlayerNameAlreadyTaken
 	{
-		me = createdGame.join(this::receiveEvent, new Player(playerName));
+		listener = new EventReceiver(getUI().orElseThrow());
+		me = createdGame.join(listener, new Player(playerName));
 	}
 
 	Dixit getGame()
@@ -171,7 +199,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			this.setGameId(UUID.randomUUID().toString());
 			Dixit createdGame = games.getOrCreate(this.gameId);
 			createdGame.desiredAmountOfPlayers = desiredAmountOfPlayers.getValue();
-			getUI().get().navigate(this.gameId);
+			getUI().get().navigate(DixitView.class, this.gameId);
 			left.remove(createGameArea);
 		};
 	}
@@ -254,13 +282,43 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		right.add(scroller);
 	}
 
+	private class EventReceiver implements Consumer<GameEvent>
+	{
+		UI ui;
+
+		EventReceiver(UI ui)
+		{
+			this.ui = ui;
+		}
+
+		@Override
+		public void accept(GameEvent event)
+		{
+			// Must lock the session to execute logic safely
+			try
+			{
+				ui.access(() -> {
+					event.executeInternally(DixitView.this);
+					ui.push();
+				}).get();
+			}
+			catch(InterruptedException | ExecutionException e)
+			{
+				getUI().orElseThrow().access(() -> Notification.show("Error occured while processing event: " + event + " :" + e));
+
+			}
+		}
+	}
+
 	public void receiveEvent(GameEvent event)
 	{
 		// Must lock the session to execute logic safely
 		try
 		{
-			getUI().orElseThrow().access(() -> {
+			UI ui = getUI().orElseThrow();
+			ui.access(() -> {
 				event.executeInternally(DixitView.this);
+				ui.push();
 			}).get();
 		}
 		catch(InterruptedException | ExecutionException e)
