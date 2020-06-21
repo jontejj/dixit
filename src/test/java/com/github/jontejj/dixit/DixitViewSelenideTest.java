@@ -18,29 +18,18 @@ import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.logging.LogEntries;
-import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.Logs;
 
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideConfig;
 import com.codeborne.selenide.SelenideDriver;
 import com.codeborne.selenide.WebDriverRunner;
-import com.google.common.io.Files;
 
 public class DixitViewSelenideTest
 {
@@ -68,8 +57,8 @@ public class DixitViewSelenideTest
 		String urlToJoin = WebDriverRunner.url();
 
 		// Other players join
-		SelenideDriver browser1 = new SelenideDriver(new SelenideConfig().timeout(20000));
-		SelenideDriver browser2 = new SelenideDriver(new SelenideConfig().timeout(20000));
+		SelenideDriver browser1 = new SelenideDriver(new SelenideConfig());// .timeout(20000));
+		SelenideDriver browser2 = new SelenideDriver(new SelenideConfig());// .timeout(20000));
 
 		browser1.open(urlToJoin);
 		browser2.open(urlToJoin);
@@ -84,7 +73,7 @@ public class DixitViewSelenideTest
 			System.out.println("Browser log: " + logEntry);
 		}
 
-		Thread.sleep(20000);
+		// Thread.sleep(20000);
 		// }
 		// catch(Exception e)
 		// {
@@ -102,34 +91,34 @@ public class DixitViewSelenideTest
 		// }
 	}
 
-	@Test
-	@Disabled
-	public void testLocalChrome(ChromeDriver driver) throws IOException
-	{
-		// ChromeOptions opt = new ChromeOptions();
-		// opt.setExperimentalOption("w3c", true);
-		// use local Chrome in this test
-		driver.get("https://google.com/ncr");
-		driver.findElementByName("q").sendKeys("cheese" + Keys.ENTER);
-
-		System.out.println(driver.manage().ime().getAvailableEngines());
-
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-		File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.FILE);
-		Files.copy(screenshotFile, new File("google.jpg"));
-		Logs logs = driver.manage().logs();
-		for(String logType : logs.getAvailableLogTypes())
-		{
-			LogEntries logEntries = logs.get(logType);
-			List<LogEntry> logEntriesList = logEntries.getAll().stream().filter(l -> l.getLevel().intValue() > Level.INFO.intValue())
-					.collect(Collectors.toList());
-			logEntriesList.stream().forEach(logEntry -> {
-				System.out.println("From browser logs (" + logType + "): " + logEntry.toString());
-			});
-
-		}
-	}
+	// @Test
+	// @Disabled
+	// public void testLocalChrome(ChromeDriver driver) throws IOException
+	// {
+	// // ChromeOptions opt = new ChromeOptions();
+	// // opt.setExperimentalOption("w3c", true);
+	// // use local Chrome in this test
+	// driver.get("https://google.com/ncr");
+	// driver.findElementByName("q").sendKeys("cheese" + Keys.ENTER);
+	//
+	// System.out.println(driver.manage().ime().getAvailableEngines());
+	//
+	// driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+	//
+	// File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.FILE);
+	// Files.copy(screenshotFile, new File("google.jpg"));
+	// Logs logs = driver.manage().logs();
+	// for(String logType : logs.getAvailableLogTypes())
+	// {
+	// LogEntries logEntries = logs.get(logType);
+	// List<LogEntry> logEntriesList = logEntries.getAll().stream().filter(l -> l.getLevel().intValue() > Level.INFO.intValue())
+	// .collect(Collectors.toList());
+	// logEntriesList.stream().forEach(logEntry -> {
+	// System.out.println("From browser logs (" + logType + "): " + logEntry.toString());
+	// });
+	//
+	// }
+	// }
 
 	// @Test
 	// public void testLocalFirefox(FirefoxDriver driver)
