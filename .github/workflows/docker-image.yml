@@ -25,7 +25,7 @@ jobs:
       - uses: devmasx/cached-docker-build-push@v0.2.0
         with:
           image_name: jontejj/dixit
-          cache_stage_target: builder
+          cache_stage_target: build
 #            build_params: --build-arg=NPM_TOKEN=${{secrets.NPM_TOKEN}}
             
 #      - uses: whoan/docker-build-with-cache-action@v5
