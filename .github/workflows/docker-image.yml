@@ -18,18 +18,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: docker/build-push-action@v1
+      - uses: whoan/docker-build-with-cache-action@v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: jontejj/dixit
-          tags: latest
-          tag_with_ref: true
-          tag_with_sha: true
-          add_git_labels: true
-          path: /home/runner/work/dixit/dixit
-          dockerfile: /home/runner/work/dixit/dixit/Dockerfile
-          cache_froms: jontejj/dixit:latest 
+          password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+          image_name: jontejj/dixit
+          image_tag: latest
+          push_git_tag: true
+          
+#      - uses: docker/build-push-action@v1
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+##          repository: jontejj/dixit
+#          tags: latest
+#          tag_with_ref: true
+#          tag_with_sha: true
+#          add_git_labels: true
+#          path: /home/runner/work/dixit/dixit
+#          dockerfile: /home/runner/work/dixit/dixit/Dockerfile
+#          cache_froms: jontejj/dixit:latest 
           
       # Setup gcloud CLI
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
