@@ -18,50 +18,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Docker Login
-        run: |-
-         docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
 
-      - uses: devmasx/cached-docker-build-push@v0.1.1
+      - uses: whoan/docker-build-with-cache-action@v5
         with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: jontejj/dixit
-          cache_stage_target: build
-#          cacheImageName : jontejj/dixit:cache-build
-#            build_params: --build-arg=NPM_TOKEN=${{secrets.NPM_TOKEN}}
-            
-#      - uses: whoan/docker-build-with-cache-action@v5
-#        with:
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          image_name: jontejj/dixit
-#          image_tag: latest
-#          push_git_tag: true
-#          
-#      - uses: docker/build-push-action@v1
-#        with:
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          repository: jontejj/dixit-build
-#          target: build
-#          tags: latest
-#          path: /home/runner/work/dixit/dixit
-#          dockerfile: /home/runner/work/dixit/dixit/Dockerfile
-#          cache_froms: jontejj/dixit-build:latest
+          image_tag: latest
+          push_git_tag: true
 
-#      - uses: docker/build-push-action@v1
-#        with:
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          repository: jontejj/dixit
-#          target: run
-#          tags: latest
-#          tag_with_ref: true
-#          tag_with_sha: true
-#          add_git_labels: true
-#          path: /home/runner/work/dixit/dixit
-#          dockerfile: /home/runner/work/dixit/dixit/Dockerfile
-#          cache_froms: jontejj/dixit:latest,jontejj/dixit-build:latest
-          
       # Setup gcloud CLI
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
