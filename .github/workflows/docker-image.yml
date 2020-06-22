@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Docker Login
-      - run: |-
+        run: |-
          docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
 
       - uses: devmasx/cached-docker-build-push@v0.2.0
