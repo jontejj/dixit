@@ -333,7 +333,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 					event.translationKeyToDescribeEvent().ifPresent(translationKey -> {
 						addSystemMessage(getTranslation(translationKey.key(), event.translationKeyParams()));
 					});
-					event.executeInternally(DixitView.this);
+					event.execute(DixitView.this);
 					ui.push();
 				}).get();
 			}
@@ -342,24 +342,6 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 				getUI().orElseThrow().access(() -> Notification.show("Error occured while processing event: " + event + " :" + e));
 
 			}
-		}
-	}
-
-	public void receiveEvent(GameEvent event)
-	{
-		// Must lock the session to execute logic safely
-		try
-		{
-			UI ui = getUI().orElseThrow();
-			ui.access(() -> {
-				event.executeInternally(DixitView.this);
-				ui.push();
-			}).get();
-		}
-		catch(InterruptedException | ExecutionException e)
-		{
-			getUI().orElseThrow().access(() -> Notification.show("Error occured while processing event: " + event + " :" + e));
-
 		}
 	}
 

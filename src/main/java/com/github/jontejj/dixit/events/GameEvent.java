@@ -26,11 +26,6 @@ public abstract class GameEvent
 
 	public abstract void execute(DixitCallback callback);
 
-	public void executeInternally(DixitCallback callback)
-	{
-		execute(callback);
-	}
-
 	public Optional<TranslationKey> translationKeyToDescribeEvent()
 	{
 		return Optional.empty();

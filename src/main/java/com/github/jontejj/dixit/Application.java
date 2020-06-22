@@ -13,7 +13,6 @@ public class Application extends SpringBootServletInitializer
 
 	public static void main(String[] args)
 	{
-		System.setProperty("vaadin.i18n.provider", InternationalizationProvider.class.getName());
 		SpringApplication.run(Application.class, args);
 	}
 

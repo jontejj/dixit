@@ -29,15 +29,9 @@ public class ChatMessageEvent extends GameEvent
 
 	}
 
-	public void executeInternally(DixitCallback dixit)
-	{
-		dixit.addChatMessage(sender, message);
-		execute(dixit);
-	}
-
 	@Override
 	public void execute(DixitCallback dixit)
 	{
-
+		dixit.addChatMessage(sender, message);
 	}
 }
