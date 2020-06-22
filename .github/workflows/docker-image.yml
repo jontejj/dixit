@@ -26,6 +26,7 @@ jobs:
         with:
           image_name: jontejj/dixit
           cache_stage_target: build
+          cacheImageName : jontejj/dixit:cache-build
 #            build_params: --build-arg=NPM_TOKEN=${{secrets.NPM_TOKEN}}
             
 #      - uses: whoan/docker-build-with-cache-action@v5
