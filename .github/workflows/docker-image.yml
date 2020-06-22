@@ -21,6 +21,7 @@ jobs:
       - name: Docker Login
       - run: |-
          docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+
       - uses: devmasx/cached-docker-build-push@v0.2.0
         with:
           image_name: jontejj/dixit
