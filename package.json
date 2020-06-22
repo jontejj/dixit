@@ -59,6 +59,7 @@
     "chokidar": "^3.4.0"
   },
   "vaadin": {
+    "disableUsageStatistics": true,
     "dependencies": {
       "@polymer/polymer": "3.2.0",
       "@webcomponents/webcomponentsjs": "^2.2.10",

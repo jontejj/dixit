@@ -17,11 +17,16 @@ RUN apk add 'maven<3.6.3-r0' 'nodejs<12.18.0-r2' 'npm<12.18.0-r2'
 
 WORKDIR /app
 COPY pom.xml .
+#Download dependencies to improve caching
 RUN mvn dependency:go-offline --no-transfer-progress
-COPY src src
-COPY frontend frontend
+
 COPY package.json package.json
 COPY webpack.config.js webpack.config.js
+#Download dependencies to improve caching
+RUN npm install
+
+COPY frontend frontend
+COPY src src
 RUN mvn package -Pproduction,integration --no-transfer-progress
 
 # build modules distribution
