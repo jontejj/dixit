@@ -54,7 +54,7 @@ import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.shared.communication.PushMode;
 
 @Route("dixit")
-@CssImport("styles/shared-styles.css")
+@CssImport("shared-styles.css")
 @Push(PushMode.MANUAL)
 @PreserveOnRefresh
 @PWA(name = "dixit", shortName = "dixit")
