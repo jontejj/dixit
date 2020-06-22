@@ -41,4 +41,6 @@ public interface DixitCallback
 
 	void storyTellerPicked(Player newStoryTeller);
 
+	void addChatMessage(Player sender, String message);
+
 }

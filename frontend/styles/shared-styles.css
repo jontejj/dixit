@@ -41,3 +41,7 @@ vaadin-checkbox {
 .gameArea {
 	margin: 10px;
 }
+
+#status {
+    color: red;
+}

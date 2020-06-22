@@ -41,6 +41,7 @@ import com.github.jontejj.dixit.exceptions.GameNotConfiguredYet;
 import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
 import com.github.jontejj.dixit.exceptions.PlayerNameAlreadyTaken;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * A server side instance of this represents one ongoing game of Dixit.
@@ -59,14 +60,15 @@ public class Dixit
 	private volatile int currentStoryTellerIndex = 0;
 
 	// TODO(jontejj): benchmark and test to see if more threads are needed
-	private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+	private static final ExecutorService executorService = Executors
+			.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("dixit-%s").build());
 	static
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			@Override
 			public void run()
 			{
-				MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(1));
+				MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(2));
 			}
 		});
 	}

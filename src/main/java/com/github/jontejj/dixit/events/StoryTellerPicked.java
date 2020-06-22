@@ -14,8 +14,11 @@
  */
 package com.github.jontejj.dixit.events;
 
+import java.util.Optional;
+
 import com.github.jontejj.dixit.DixitCallback;
 import com.github.jontejj.dixit.Player;
+import com.github.jontejj.dixit.TranslationKey;
 
 public class StoryTellerPicked extends GameEvent
 {
@@ -33,8 +36,14 @@ public class StoryTellerPicked extends GameEvent
 	}
 
 	@Override
-	public String toString()
+	public Optional<TranslationKey> translationKeyToDescribeEvent()
 	{
-		return newStoryTeller + " was picked as story teller";
+		return Optional.of(TranslationKey.STORY_TELLER_PICKED);
+	}
+
+	@Override
+	public Object[] translationKeyParams()
+	{
+		return new Object[]{newStoryTeller};
 	}
 }

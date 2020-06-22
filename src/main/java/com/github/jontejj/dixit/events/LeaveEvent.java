@@ -14,8 +14,11 @@
  */
 package com.github.jontejj.dixit.events;
 
+import java.util.Optional;
+
 import com.github.jontejj.dixit.DixitCallback;
 import com.github.jontejj.dixit.Participant;
+import com.github.jontejj.dixit.TranslationKey;
 
 public class LeaveEvent extends GameEvent
 {
@@ -32,8 +35,14 @@ public class LeaveEvent extends GameEvent
 	}
 
 	@Override
-	public String toString()
+	public Optional<TranslationKey> translationKeyToDescribeEvent()
 	{
-		return playerWhoLeft + " left";
+		return Optional.of(TranslationKey.PLAYER_LEFT);
+	}
+
+	@Override
+	public Object[] translationKeyParams()
+	{
+		return new Object[]{playerWhoLeft};
 	}
 }

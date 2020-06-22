@@ -14,15 +14,35 @@
  */
 package com.github.jontejj.dixit.events;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import com.github.jontejj.dixit.DixitCallback;
+import com.github.jontejj.dixit.TranslationKey;
 
 public abstract class GameEvent
 {
+	private static final Object[] EMPTY_PARAMETERS = new Object[]{};
+
 	public abstract void execute(DixitCallback callback);
 
 	public void executeInternally(DixitCallback callback)
 	{
-		callback.addSystemMessage(toString());
 		execute(callback);
+	}
+
+	public Optional<TranslationKey> translationKeyToDescribeEvent()
+	{
+		return Optional.empty();
+	}
+
+	public Object[] translationKeyParams()
+	{
+		return EMPTY_PARAMETERS;
+	}
+
+	public String toString()
+	{
+		return translationKeyToDescribeEvent() + " (" + Arrays.asList(translationKeyParams());
 	}
 }

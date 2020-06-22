@@ -49,7 +49,7 @@ public class DixitViewSelenideIT
 	}
 
 	@Test
-	@Disabled("until graceful shutdowns can be done")
+	@Disabled("TODO!!!")
 	public void performanceTestDixit() throws InterruptedException
 	{
 		// try

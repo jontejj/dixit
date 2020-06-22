@@ -14,8 +14,11 @@
  */
 package com.github.jontejj.dixit.events;
 
+import java.util.Optional;
+
 import com.github.jontejj.dixit.DixitCallback;
 import com.github.jontejj.dixit.RoundSummarization;
+import com.github.jontejj.dixit.TranslationKey;
 
 public class RoundSummarizedEvent extends GameEvent
 {
@@ -40,5 +43,11 @@ public class RoundSummarizedEvent extends GameEvent
 	public String toString()
 	{
 		return "Round completed";
+	}
+
+	@Override
+	public Optional<TranslationKey> translationKeyToDescribeEvent()
+	{
+		return Optional.of(TranslationKey.ROUND_COMPLETED);
 	}
 }

@@ -14,8 +14,11 @@
  */
 package com.github.jontejj.dixit.events;
 
+import java.util.Optional;
+
 import com.github.jontejj.dixit.DixitCallback;
 import com.github.jontejj.dixit.Player;
+import com.github.jontejj.dixit.TranslationKey;
 
 public class PlayerPickedMatchingCard extends GameEvent
 {
@@ -34,8 +37,14 @@ public class PlayerPickedMatchingCard extends GameEvent
 	}
 
 	@Override
-	public String toString()
+	public Optional<TranslationKey> translationKeyToDescribeEvent()
 	{
-		return playerThatPicked.toString() + " picked a card";
+		return Optional.of(TranslationKey.PLAYER_PICKED_CARD);
+	}
+
+	@Override
+	public Object[] translationKeyParams()
+	{
+		return new Object[]{playerThatPicked};
 	}
 }

@@ -30,10 +30,4 @@ public class SentanceCreated extends GameEvent
 	{
 		callback.sentenceCreated(message);
 	}
-
-	@Override
-	public String toString()
-	{
-		return "";
-	}
 }

@@ -14,10 +14,12 @@
  */
 package com.github.jontejj.dixit.events;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.jontejj.dixit.DixitCallback;
 import com.github.jontejj.dixit.Participant;
+import com.github.jontejj.dixit.TranslationKey;
 
 public class JoinEvent extends GameEvent
 {
@@ -37,14 +39,20 @@ public class JoinEvent extends GameEvent
 		dixitView.gameInfoChanged();
 	}
 
-	@Override
-	public String toString()
-	{
-		return playerWhoJoined + " joined";
-	}
-
 	public Consumer<GameEvent> getListenerThatJoined()
 	{
 		return listenerThatJoined;
+	}
+
+	@Override
+	public Optional<TranslationKey> translationKeyToDescribeEvent()
+	{
+		return Optional.of(TranslationKey.PLAYER_JOINED);
+	}
+
+	@Override
+	public Object[] translationKeyParams()
+	{
+		return new Object[]{playerWhoJoined};
 	}
 }

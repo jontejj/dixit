@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<!-- Replace artifactId with vaadin-core to use only free components -->
-			<artifactId>vaadin</artifactId>
+			<artifactId>vaadin-core</artifactId>
 			<exclusions>
 				<!-- Webjars are only needed when running in Vaadin 13 compatibility 
 					mode -->
@@ -110,6 +110,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- ADD-ONS -->
+		<!-- <dependency>
+			<groupId>org.claspina</groupId>
+			<artifactId>confirm-dialog</artifactId>
+			<version>2.0.0</version>
+		</dependency> -->
+		<!-- /ADD-ONS  -->
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-spring-boot-starter</artifactId>

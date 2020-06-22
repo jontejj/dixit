@@ -31,7 +31,7 @@ public class ChatMessageEvent extends GameEvent
 
 	public void executeInternally(DixitCallback dixit)
 	{
-		dixit.addMessage(toString());
+		dixit.addChatMessage(sender, message);
 		execute(dixit);
 	}
 
@@ -39,11 +39,5 @@ public class ChatMessageEvent extends GameEvent
 	public void execute(DixitCallback dixit)
 	{
 
-	}
-
-	@Override
-	public String toString()
-	{
-		return sender + ": " + message;
 	}
 }
