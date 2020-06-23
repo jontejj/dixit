@@ -109,6 +109,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	private EventReceiver listener;
 
+	private int statusCounter = 0;
+
 	public DixitView(@Autowired Games games)
 	{
 		left = new FlexLayout();
@@ -142,7 +144,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	private Label statusLabel()
 	{
 		Label statusLabel = new Label("");
-		statusLabel.setId("status");
+		statusLabel.setId(CssId.STATUS);
+		statusLabel.getElement().setProperty(HTLMProperties.STATUS_COUNTER, statusCounter);
 		return statusLabel;
 	}
 
@@ -165,7 +168,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		{
 			currentGame.unregister(me, listener);
 			listener = null;
-			status.setText("Left game");
+			// status.setText("Left game");
 		}
 	}
 
@@ -423,12 +426,14 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	public void askForSentence()
 	{
-		actionRequired(MAKE_UP_A_SENTENCE_AND_PICK_A_CARD);
+		updateStatusText(MAKE_UP_A_SENTENCE_AND_PICK_A_CARD);
+		updateRequestedAction(RequestedAction.MAKE_A_SENTENCE);
 		VerticalLayout sentenceArea = new VerticalLayout();
 
 		AtomicReference<Card> pickedCard = new AtomicReference<>();
 		AtomicReference<String> sentence = new AtomicReference<>();
 		TextField sentenceField = new TextField();
+		sentenceField.setId(CssId.SENTENCE_PROMPT);
 		sentenceField.setLabel(getTranslation(TranslationKey.SENTENCE.key()));
 		sentenceField.addKeyUpListener(Key.ENTER, (e) -> {
 			if(pickedCard.get() != null)
@@ -438,7 +443,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 				return;
 			}
 			sentence.set(sentenceField.getValue());
-			actionRequired(SENTENCE_GIVEN_BUT_NO_CARD);
+			updateStatusText(SENTENCE_GIVEN_BUT_NO_CARD);
 		});
 
 		sentenceArea.add(sentenceField);
@@ -452,16 +457,23 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			else
 			{
 				pickedCard.set(card);
-				actionRequired(CARD_PICKED_BUT_NO_SENTENCE);
+				updateStatusText(CARD_PICKED_BUT_NO_SENTENCE);
 			}
 		}, Selectable.YES);
 	}
 
-	private void actionRequired(TranslationKey actionRequired, Object ... params)
+	private void updateStatusText(TranslationKey actionRequired, Object ... params)
 	{
 		String translatedMessage = getTranslation(actionRequired.key(), (Object[]) params);
 		addSystemMessage(translatedMessage);
 		status.setText(translatedMessage);
+	}
+
+	private void updateRequestedAction(RequestedAction requiredAction)
+	{
+		statusCounter++;
+		status.getElement().setProperty(HTLMProperties.REQUESTED_ACTION, requiredAction.asAttribute());
+		status.getElement().setProperty(HTLMProperties.STATUS_COUNTER, statusCounter);
 	}
 
 	private void pickCardAndSentenceAsStoryTeller(Card chosenCard, String message)
@@ -480,6 +492,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	{
 		removeCardArea();
 		cardArea = new FlexLayout();
+		cardArea.setId(CssId.CARD_AREA);
 		cardArea.setFlexDirection(FlexDirection.ROW);
 		cardArea.setFlexWrap(FlexWrap.WRAP);
 		for(Card card : cardsToPickAmongst)
@@ -487,7 +500,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			Image cardImage = imageFor(card);
 			if(selectable == Selectable.YES)
 			{
-				cardImage.addClassName("selectable");
+				cardImage.addClassName(CssClassNames.SELECTABLE);
 			}
 			cardImage.addClickListener((e) -> {
 				pickedCardAction.accept(card);
@@ -510,19 +523,21 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		List<PickedCard> givenCards = currentGame.currentStoryTeller.getGivenCards();
 		if(me.player.equals(currentGame.currentStoryTeller.player))
 		{
-			actionRequired(OTHER_PLAYERS_PICKED_THESE_CARDS);
+			updateStatusText(OTHER_PLAYERS_PICKED_THESE_CARDS);
 			showCardsWithPicker(givenCards, (card) -> {
 			}, Selectable.NO);
 		}
 		else
 		{
-			actionRequired(GUESS_WHICH_CARD);
+			updateStatusText(GUESS_WHICH_CARD);
+			updateRequestedAction(RequestedAction.GUESS_WHICH_CARD);
 			givenCards.removeIf(card -> card.pickedBy.equals(me.player));
 			showCardsWithPicker(givenCards, pickedCard -> {
 				try
 				{
 					currentGame.currentStoryTeller.betOnStoryTellersCard(pickedCard, me.player);
-					actionRequired(WAITING_FOR_OTHER_PLAYERS_TO_PICK_A_CARD);
+					updateStatusText(WAITING_FOR_OTHER_PLAYERS_TO_PICK_A_CARD);
+					updateRequestedAction(RequestedAction.WAIT);
 					currentGame.broadcast(new PlayerGuessedStoryTellerCard(me.player));
 				}
 				catch(InvalidCardPicked e)
@@ -608,26 +623,29 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	{
 		if(me.player.equals(currentGame.currentStoryTeller.player))
 		{
-			actionRequired(ROLL_YOUR_THUMBS_STORY_TELLER);
+			updateStatusText(ROLL_YOUR_THUMBS_STORY_TELLER);
+			updateRequestedAction(RequestedAction.WAIT);
 		}
 		else
 		{
 			Player storyTeller = currentGame.currentStoryTeller.player;
-			actionRequired(STORY_TELLER_SAYS, storyTeller, message);
+			updateStatusText(STORY_TELLER_SAYS, storyTeller, message);
+			updateRequestedAction(RequestedAction.MATCH_CARD_TO_SENTENCE);
 			showCardsWithPicker(me.cards, card -> {
 				try
 				{
 					// TODO: these operations should be done inside of Dixit
 					PickedCard pickedCard = me.pickCardThatMatchesTheStoryTellers(card);
 					currentGame.currentStoryTeller.givePickedCard(pickedCard);
-					actionRequired(WAITING_FOR_OTHER_PLAYERS_TO_PICK_A_CARD);
+					updateStatusText(WAITING_FOR_OTHER_PLAYERS_TO_PICK_A_CARD);
+					updateRequestedAction(RequestedAction.WAIT);
 					currentGame.broadcast(new PlayerPickedMatchingCard(me.player));
 					me.cards.remove(card);
 					currentGame.giveOneCardToPlayer(me);
 				}
 				catch(InvalidCardPicked | EmptyDeck | PlayerAlreadyGaveCard error)
 				{
-					actionRequired(ERROR, error.getMessage());
+					updateStatusText(ERROR, error.getMessage());
 					Notification.show(error.getMessage());
 				}
 			}, Selectable.YES);
@@ -637,13 +655,22 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	@Override
 	public void storyTellerPicked(Player newStoryTeller)
 	{
+		// TODO: the dixit instance should keep track of who I am?
 		if(me.player.equals(newStoryTeller))
 		{
 			askForSentence();
 		}
 		else
 		{
-			actionRequired(ROLL_YOUR_THUMBS_GUESSER);
+			updateStatusText(ROLL_YOUR_THUMBS_GUESSER);
+			updateRequestedAction(RequestedAction.WAIT);
 		}
+	}
+
+	@Override
+	public void gameFinished(Player winner)
+	{
+		updateStatusText(TranslationKey.GAME_FINISHED, winner);
+		updateRequestedAction(RequestedAction.GAME_FINISHED_GO_HOME);
 	}
 }

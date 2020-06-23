@@ -14,11 +14,7 @@
  */
 package com.github.jontejj.dixit;
 
-public final class CssId
+public final class CssClassNames
 {
-	static final String DESIRED_AMOUNT_OF_PLAYERS = "desired-amount-of-players";
-	static final String PLAYER_NAME = "player-name";
-	static final String STATUS = "status";
-	public static final String CARD_AREA = "card-area";
-	public static final String SENTENCE_PROMPT = "sentence-prompt";
+	public static final String SELECTABLE = "selectable";
 }

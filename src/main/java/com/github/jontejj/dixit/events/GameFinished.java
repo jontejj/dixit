@@ -14,11 +14,8 @@
  */
 package com.github.jontejj.dixit.events;
 
-import java.util.Optional;
-
 import com.github.jontejj.dixit.DixitCallback;
 import com.github.jontejj.dixit.Player;
-import com.github.jontejj.dixit.TranslationKey;
 
 public class GameFinished extends GameEvent
 {
@@ -32,17 +29,6 @@ public class GameFinished extends GameEvent
 	@Override
 	public void execute(DixitCallback callback)
 	{
-	}
-
-	@Override
-	public Optional<TranslationKey> translationKeyToDescribeEvent()
-	{
-		return Optional.of(TranslationKey.GAME_FINISHED);
-	}
-
-	@Override
-	public Object[] translationKeyParams()
-	{
-		return new Object[]{winner};
+		callback.gameFinished(winner);
 	}
 }

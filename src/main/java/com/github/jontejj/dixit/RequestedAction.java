@@ -14,35 +14,36 @@
  */
 package com.github.jontejj.dixit;
 
-public interface DixitCallback
+public enum RequestedAction
 {
 	/**
-	 * Adds a message from the system
+	 * The story teller should make up a sentence and pick a card from their hand
 	 */
-	void addSystemMessage(String message);
-
+	MAKE_A_SENTENCE,
 	/**
-	 * Adds a message from a user
+	 * Any kind of wait: wait on other players to pick cards for example
 	 */
-	void addMessage(String message);
-
+	WAIT,
 	/**
-	 * Joined players changed, Scores changed etc
+	 * The other players should pick a card that matches the given sentence the best
 	 */
-	void gameInfoChanged();
+	MATCH_CARD_TO_SENTENCE,
+	/**
+	 * The other players should pick the card they think the story teller picked
+	 */
+	GUESS_WHICH_CARD,
+	/**
+	 * Game is finished, all players can go home
+	 */
+	GAME_FINISHED_GO_HOME;
 
-	void playerGuessedStoryTellerCard();
+	public String asAttribute()
+	{
+		return name();
+	}
 
-	void playerPickedMatchingCard(Player playerThatPicked);
-
-	void summarizationReceived(RoundSummarization summarization);
-
-	void sentenceCreated(String message);
-
-	void storyTellerPicked(Player newStoryTeller);
-
-	void addChatMessage(Player sender, String message);
-
-	void gameFinished(Player winner);
-
+	public static RequestedAction fromAttribute(String attribute)
+	{
+		return valueOf(attribute);
+	}
 }
