@@ -121,6 +121,8 @@ public class DixitViewSelenideIT
 		String initialUrl = "http://localhost/dixit";
 		open(initialUrl);
 		$("#" + CssId.DESIRED_AMOUNT_OF_PLAYERS).sendKeys(Keys.BACK_SPACE + "" + nrOfPlayers + Keys.ENTER);
+
+		waitForVaadin(WebDriverRunner.driver());
 		String urlToJoin = WebDriverRunner.url();
 		if(initialUrl.equals(urlToJoin))
 			throw new AssertionError(urlToJoin + " should contain a game id");
