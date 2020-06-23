@@ -178,6 +178,7 @@ public class DixitViewSelenideIT
 		waitForVaadin(clientBrowser.driver());
 		// Wait until all players have finished responded to the last requested action
 		barrier.await(5, TimeUnit.SECONDS);
+		waitForVaadin(clientBrowser.driver());
 	}
 
 	private void makeSentenceAndPickCard(SelenideDriver clientBrowser)

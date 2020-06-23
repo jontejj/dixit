@@ -10,4 +10,6 @@
 	<logger name="org.atmosphere" level="INFO" />
 	<logger name="org.apache.http.wire" level="INFO" />
 	<logger name="org.springframework.beans.factory.support.DefaultListableBeanFactory" level="INFO" />
+	<logger name="com.vaadin.flow.component.internal.UIInternals" level="INFO" />
+	<logger name="com.vaadin.flow.server.communication.UidlWriter" level="INFO" />
 </configuration>

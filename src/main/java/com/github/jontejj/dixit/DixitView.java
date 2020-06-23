@@ -505,6 +505,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			cardImage.addClickListener((e) -> {
 				pickedCardAction.accept(card);
 				left.remove(cardArea);
+				cardArea = null;
 			});
 			cardArea.add(cardImage);
 		}
@@ -553,6 +554,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		if(cardArea != null)
 		{
 			left.remove(cardArea);
+			cardArea = null;
 		}
 	}
 
