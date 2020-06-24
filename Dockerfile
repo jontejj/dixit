@@ -27,7 +27,8 @@ RUN npm install
 
 COPY frontend frontend
 COPY src src
-RUN mvn package -Pproduction,integration --no-transfer-progress
+RUN mvn --version
+RUN mvn verify -Pproduction,integration --no-transfer-progress
 
 # build modules distribution
 RUN jlink --compress=2 --verbose --add-modules java.base,java.logging,java.naming,java.desktop,java.management,java.security.jgss,java.instrument --no-header-files --no-man-pages --output "$JAVA_MINIMAL"
