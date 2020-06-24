@@ -243,6 +243,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		joinButton.addClickListener(e -> {
 			try
 			{
+				// TODO: why is this empty even when the client has finished pushing?
 				if(playerName.isEmpty())
 					throw new EmptyPlayerName();
 				joinGame(playerName.getValue(), currentGame);

@@ -14,6 +14,7 @@
  */
 package com.github.jontejj.dixit;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.stereotype.Service;
@@ -29,5 +30,10 @@ public class Games
 	public Dixit getOrCreate(String gameId)
 	{
 		return ongoingGames.computeIfAbsent(gameId, (game) -> new Dixit());
+	}
+
+	public Optional<Dixit> get(String gameId)
+	{
+		return Optional.ofNullable(ongoingGames.get(gameId));
 	}
 }

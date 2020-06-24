@@ -22,12 +22,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.github.jontejj.dixit.StatusController.Status;
 import com.github.jontejj.dixit.events.GameEvent;
 import com.github.jontejj.dixit.events.GameFinished;
 import com.github.jontejj.dixit.events.JoinEvent;
@@ -60,18 +65,7 @@ public class Dixit
 	private volatile int currentStoryTellerIndex = 0;
 
 	// TODO(jontejj): benchmark and test to see if more threads are needed
-	private static final ExecutorService executorService = Executors
-			.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("dixit-%s").build());
-	static
-	{
-		Runtime.getRuntime().addShutdownHook(new Thread(){
-			@Override
-			public void run()
-			{
-				MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(2));
-			}
-		});
-	}
+	private final ExecutorService executorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("dixit-%s").build());
 
 	private List<Consumer<GameEvent>> consumers = new CopyOnWriteArrayList<>();
 
@@ -80,7 +74,46 @@ public class Dixit
 
 	Dixit()
 	{
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+			@Override
+			public void run()
+			{
+				MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(2));
+			}
+		});
 		this.consumers.add(saver::handleEvent);
+	}
+
+	private static final int MAX_FLUSHERS = 10;
+	private final AtomicInteger flushers = new AtomicInteger(0);
+
+	public Status flushEvents(TimeUnit timeUnit, long timeout)
+	{
+		try
+		{
+			if(flushers.incrementAndGet() == MAX_FLUSHERS)
+				return Status.TOO_MANY_FLUSHERS;
+			executorService.submit(() -> {
+			}).get(timeout, timeUnit);
+			return Status.FLUSHED;
+		}
+		catch(InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			return Status.SHUTTING_DOWN;
+		}
+		catch(ExecutionException e)
+		{
+			throw new IllegalStateException("Can't happen for empty code block?", e);
+		}
+		catch(TimeoutException e)
+		{
+			return Status.TIMEOUT;
+		}
+		finally
+		{
+			flushers.decrementAndGet();
+		}
 	}
 
 	public Participant join(Consumer<GameEvent> listener, Player player) throws GameNotConfiguredYet, AllPlayersAlreadyJoined, PlayerNameAlreadyTaken
