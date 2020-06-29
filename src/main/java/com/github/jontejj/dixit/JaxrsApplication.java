@@ -14,15 +14,13 @@
  */
 package com.github.jontejj.dixit;
 
-public final class CssId
+import javax.ws.rs.ApplicationPath;
+
+import org.springframework.stereotype.Component;
+
+@Component
+@ApplicationPath("/dixit-rest")
+// @EnableAutoConfiguration
+public class JaxrsApplication extends javax.ws.rs.core.Application
 {
-	static final String DESIRED_AMOUNT_OF_PLAYERS = "desired-amount-of-players";
-	static final String PLAYER_NAME = "player-name";
-	static final String STATUS = "status";
-	public static final String CARD_AREA = "card-area";
-	public static final String SENTENCE_PROMPT = "sentence-prompt";
-	public static final String CLOSE_SUMMARIZATION = "close-round-summarization";
-	public static final String JOIN_GAME_BUTTON = "join-game";
-	public static final String CREATE_GAME_BUTTON = "create-game";
-	public static final String SEND_SENTENCE = "send-sentence";
 }

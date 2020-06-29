@@ -92,8 +92,6 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	private VerticalLayout messages = new VerticalLayout();
 
-	// private Label gameIdLabel;
-
 	Participant me;
 
 	private FlexLayout gameArea;
@@ -135,6 +133,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 		});
 		status = statusLabel();
+		// updateRequestedAction(RequestedAction.WAIT);
 		left.add(logo);
 		gameInfoChanged();
 
@@ -145,7 +144,6 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	{
 		Label statusLabel = new Label("");
 		statusLabel.setId(CssId.STATUS);
-		statusLabel.getElement().setProperty(HTLMProperties.STATUS_COUNTER, statusCounter);
 		return statusLabel;
 	}
 
@@ -212,6 +210,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		desiredAmountOfPlayers.focus();
 		// desiredAmountOfPlayers.addKeyUpListener(key, listener, modifiers)
 		Button createButton = new Button(getTranslation(TranslationKey.CREATE_GAME_BUTTON.key()));
+		createButton.setId(CssId.CREATE_GAME_BUTTON);
 		createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		createButton.addClickShortcut(Key.ENTER);
 		createButton.addClickListener(createGame(createGameArea, desiredAmountOfPlayers));
@@ -240,6 +239,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 		Button joinButton = new Button(getTranslation(TranslationKey.JOIN_GAME_BUTTON.key()));
 		joinButton.addClickShortcut(Key.ENTER);
+		joinButton.setId(CssId.JOIN_GAME_BUTTON);
 		joinButton.addClickListener(e -> {
 			try
 			{
@@ -422,13 +422,10 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 	public void setGameId(String gameId)
 	{
 		this.gameId = gameId;
-		// this.gameIdLabel.setText(this.gameId);
 	}
 
 	public void askForSentence()
 	{
-		updateStatusText(MAKE_UP_A_SENTENCE_AND_PICK_A_CARD);
-		updateRequestedAction(RequestedAction.MAKE_A_SENTENCE);
 		VerticalLayout sentenceArea = new VerticalLayout();
 
 		AtomicReference<Card> pickedCard = new AtomicReference<>();
@@ -437,17 +434,15 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		sentenceField.setId(CssId.SENTENCE_PROMPT);
 		sentenceField.setLabel(getTranslation(TranslationKey.SENTENCE.key()));
 		sentenceField.addKeyUpListener(Key.ENTER, (e) -> {
-			if(pickedCard.get() != null)
-			{
-				pickCardAndSentenceAsStoryTeller(pickedCard.get(), sentenceField.getValue());
-				left.remove(sentenceArea);
-				return;
-			}
-			sentence.set(sentenceField.getValue());
-			updateStatusText(SENTENCE_GIVEN_BUT_NO_CARD);
+			sentencePicked(sentenceArea, pickedCard, sentence, sentenceField);
 		});
 
 		sentenceArea.add(sentenceField);
+		Button sendSentence = new Button(getTranslation(TranslationKey.SEND_SENTENCE.key()), (e) -> {
+			sentencePicked(sentenceArea, pickedCard, sentence, sentenceField);
+		});
+		sendSentence.setId(CssId.SEND_SENTENCE);
+		sentenceArea.add(sendSentence);
 		left.add(sentenceArea);
 		showCardsWithPicker(me.cards, card -> {
 			if(sentence.get() != null)
@@ -461,6 +456,21 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 				updateStatusText(CARD_PICKED_BUT_NO_SENTENCE);
 			}
 		}, Selectable.YES);
+		updateStatusText(MAKE_UP_A_SENTENCE_AND_PICK_A_CARD);
+		updateRequestedAction(RequestedAction.MAKE_A_SENTENCE);
+	}
+
+	private void sentencePicked(VerticalLayout sentenceArea, AtomicReference<Card> pickedCard, AtomicReference<String> sentence,
+			TextField sentenceField)
+	{
+		if(pickedCard.get() != null)
+		{
+			pickCardAndSentenceAsStoryTeller(pickedCard.get(), sentenceField.getValue());
+			left.remove(sentenceArea);
+			return;
+		}
+		sentence.set(sentenceField.getValue());
+		updateStatusText(SENTENCE_GIVEN_BUT_NO_CARD);
 	}
 
 	private void updateStatusText(TranslationKey actionRequired, Object ... params)
@@ -525,14 +535,12 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		List<PickedCard> givenCards = currentGame.currentStoryTeller.getGivenCards();
 		if(me.player.equals(currentGame.currentStoryTeller.player))
 		{
-			updateStatusText(OTHER_PLAYERS_PICKED_THESE_CARDS);
 			showCardsWithPicker(givenCards, (card) -> {
 			}, Selectable.NO);
+			updateStatusText(OTHER_PLAYERS_PICKED_THESE_CARDS);
 		}
 		else
 		{
-			updateStatusText(GUESS_WHICH_CARD);
-			updateRequestedAction(RequestedAction.GUESS_WHICH_CARD);
 			givenCards.removeIf(card -> card.pickedBy.equals(me.player));
 			showCardsWithPicker(givenCards, pickedCard -> {
 				try
@@ -547,6 +555,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 					Notification.show(e.getMessage());
 				}
 			}, Selectable.YES);
+			updateStatusText(GUESS_WHICH_CARD);
+			updateRequestedAction(RequestedAction.GUESS_WHICH_CARD);
 		}
 	}
 
@@ -591,10 +601,12 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			pickedCardView.add(imageFor(pickedCard));
 			pickedCardsView.add(pickedCardView);
 		});
-		pickedCardsView.add(new Button(getTranslation(TranslationKey.CLOSE_ROUND_SUMMARIZATION.key()), e -> {
+		Button closeButton = new Button(getTranslation(TranslationKey.CLOSE_ROUND_SUMMARIZATION.key()), e -> {
 			this.left.remove(summarizationView);
 			summarizationView = null;
-		}));
+		});
+		closeButton.setId(CssId.CLOSE_SUMMARIZATION);
+		pickedCardsView.add(closeButton);
 		summarizationView.add(scoresView, pickedCardsView);
 		this.left.add(summarizationView);
 	}
@@ -632,8 +644,6 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		else
 		{
 			Player storyTeller = currentGame.currentStoryTeller.player;
-			updateStatusText(STORY_TELLER_SAYS, storyTeller, message);
-			updateRequestedAction(RequestedAction.MATCH_CARD_TO_SENTENCE);
 			showCardsWithPicker(me.cards, card -> {
 				try
 				{
@@ -652,6 +662,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 					Notification.show(error.getMessage());
 				}
 			}, Selectable.YES);
+			updateStatusText(STORY_TELLER_SAYS, storyTeller, message);
+			updateRequestedAction(RequestedAction.MATCH_CARD_TO_SENTENCE);
 		}
 	}
 

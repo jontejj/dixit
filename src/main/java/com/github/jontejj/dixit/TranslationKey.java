@@ -82,7 +82,8 @@ public enum TranslationKey
 	/**
 	 * Winner
 	 */
-	GAME_FINISHED;
+	GAME_FINISHED,
+	SEND_SENTENCE;
 
 	public String key()
 	{

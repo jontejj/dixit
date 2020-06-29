@@ -101,3 +101,8 @@ gcloud beta compute --project=dixit-280012 instances create-with-container dixit
 
 ## Links
 [https://github.com/GoogleCloudPlatform/github-actions/blob/master/example-workflows/gce/README.md](https://github.com/GoogleCloudPlatform/github-actions/blob/master/example-workflows/gce/README.md) 
+
+## Run Zalenium
+```
+docker run --rm -ti --name zalenium -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/videos:/home/seluser/videos --privileged dosel/zalenium start
+```

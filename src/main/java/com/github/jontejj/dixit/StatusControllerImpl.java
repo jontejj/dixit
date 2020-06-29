@@ -14,15 +14,30 @@
  */
 package com.github.jontejj.dixit;
 
-public final class CssId
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class StatusControllerImpl implements StatusController
 {
-	static final String DESIRED_AMOUNT_OF_PLAYERS = "desired-amount-of-players";
-	static final String PLAYER_NAME = "player-name";
-	static final String STATUS = "status";
-	public static final String CARD_AREA = "card-area";
-	public static final String SENTENCE_PROMPT = "sentence-prompt";
-	public static final String CLOSE_SUMMARIZATION = "close-round-summarization";
-	public static final String JOIN_GAME_BUTTON = "join-game";
-	public static final String CREATE_GAME_BUTTON = "create-game";
-	public static final String SEND_SENTENCE = "send-sentence";
+	private final Games games;
+
+	public StatusControllerImpl(@Autowired Games games)
+	{
+		this.games = games;
+
+	}
+
+	@Override
+	public Status wait(String gameId, Long timeout, TimeUnit timeUnit)
+	{
+		Optional<Dixit> game = games.get(gameId);
+		if(game.isEmpty())
+			return Status.GAME_DOES_NOT_EXIST;
+		return game.get().flushEvents(timeUnit, timeout);
+	}
+
 }

@@ -33,6 +33,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
+import javax.ws.rs.core.UriBuilder;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -40,13 +45,14 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogType;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Driver;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideConfig;
 import com.codeborne.selenide.SelenideDriver;
 import com.codeborne.selenide.SelenideElement;
-import com.codeborne.selenide.WebDriverRunner;
+import com.github.jontejj.dixit.StatusController.Status;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -59,6 +65,8 @@ public class DixitViewSelenideIT
 	private final String BASE_GAME_URL;
 	private static final Random random = new Random(1);
 
+	private final StatusController statusController;
+
 	public DixitViewSelenideIT()
 	{
 		String sutUrl = System.getProperty("sut.url");
@@ -70,6 +78,9 @@ public class DixitViewSelenideIT
 		{
 			BASE_GAME_URL = "http://localhost/dixit";
 		}
+		ResteasyClient client = new ResteasyClientBuilderImpl().build();
+		ResteasyWebTarget target = client.target(UriBuilder.fromPath(BASE_GAME_URL + "-rest"));
+		statusController = target.proxy(StatusController.class);
 	}
 
 	@Test
@@ -92,7 +103,8 @@ public class DixitViewSelenideIT
 	public void performanceTestDixit() throws InterruptedException, ExecutionException, TimeoutException
 	{
 		System.out.println(System.getProperty("selenide.remote"));
-		String urlToJoin = createGame();
+		SelenideDriver clientBrowser = new SelenideDriver(new SelenideConfig());
+		String gameId = createGame(clientBrowser);
 
 		// TODO: join with the main browser as well
 		ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nrOfPlayers));
@@ -100,13 +112,22 @@ public class DixitViewSelenideIT
 		// Other players join
 		for(int i = 0; i < nrOfPlayers; i++)
 		{
-			futures.add(executor.submit(automaticallyPlayingclient(urlToJoin, randomPlayerName())));
+			futures.add(executor.submit(automaticallyPlayingclient(gameId, randomPlayerName())));
 		}
+		futures.add(executor.submit(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception
+			{
+				joinAsPlayerAndPlayUntilEnd(gameId, randomPlayerName(), clientBrowser);
+				return null;
+			}
+		}));
 
 		ListenableFuture<List<Object>> allFuturesList = Futures.allAsList(futures);
 		// A game between nrOfPlayers should finish within the allowed timeout
-		allFuturesList.get(120, TimeUnit.SECONDS);
+		allFuturesList.get(500, TimeUnit.SECONDS);
 
+		// TODO: get the logs from all drivers
 		List<String> severeLogEntries = new ArrayList<>();
 		for(String logEntry : Selenide.getWebDriverLogs(LogType.BROWSER, Level.SEVERE))
 		{
@@ -114,6 +135,11 @@ public class DixitViewSelenideIT
 		}
 		assertThat(severeLogEntries).isEmpty();
 
+	}
+
+	private String urlToJoinFromGameId(String gameId)
+	{
+		return BASE_GAME_URL + "/" + gameId;
 	}
 
 	private static String randomPlayerName()
@@ -131,69 +157,83 @@ public class DixitViewSelenideIT
 
 	private static final List<String> prefixes = List.of("Dog", "Cat", "Horse");
 
-	private String createGame()
+	private String createGame(SelenideDriver clientBrowser)
 	{
-		// TODO: avoid hardcoding this?
 		String initialUrl = BASE_GAME_URL;
-		open(initialUrl);
-		$("#" + CssId.DESIRED_AMOUNT_OF_PLAYERS).sendKeys(Keys.BACK_SPACE + "" + nrOfPlayers + Keys.ENTER);
+		clientBrowser.open(initialUrl);
+		waitForVaadin(clientBrowser.driver());
+		clientBrowser.$("#" + CssId.DESIRED_AMOUNT_OF_PLAYERS).sendKeys(Keys.BACK_SPACE + "" + nrOfPlayers);
+		waitForVaadin(clientBrowser.driver());
+		clientBrowser.$("#" + CssId.CREATE_GAME_BUTTON).click();
 
-		waitForVaadin(WebDriverRunner.driver());
-		String urlToJoin = WebDriverRunner.url();
+		waitForVaadin(clientBrowser.driver());
+		String urlToJoin = clientBrowser.url();
 		if(initialUrl.equals(urlToJoin))
 			throw new AssertionError(urlToJoin + " should contain a game id");
-		return urlToJoin;
+
+		String gameId = urlToJoin.replace(BASE_GAME_URL + "/", "");
+
+		return gameId;
 	}
 
-	private Callable<Void> automaticallyPlayingclient(String urlToGame, String playerName)
+	private Callable<Void> automaticallyPlayingclient(String gameId, String playerName)
 	{
 		return () -> {
 			SelenideDriver clientBrowser = new SelenideDriver(new SelenideConfig());
-
+			String urlToGame = urlToJoinFromGameId(gameId);
 			clientBrowser.open(urlToGame);
 
-			joinAsPlayerAndPlayUntilEnd(playerName, clientBrowser);
+			joinAsPlayerAndPlayUntilEnd(gameId, playerName, clientBrowser);
 			return null;
 		};
 	}
 
-	private void joinAsPlayerAndPlayUntilEnd(String playerName, SelenideDriver clientBrowser) throws InterruptedException, TimeoutException
+	private void joinAsPlayerAndPlayUntilEnd(String gameId, String playerName, SelenideDriver clientBrowser)
+			throws InterruptedException, TimeoutException, BrokenBarrierException
 	{
 		SelenideElement playerNamePrompt = clientBrowser.$("#" + CssId.PLAYER_NAME);
+		waitForVaadin(clientBrowser.driver());
 		playerNamePrompt.sendKeys(playerName);
 		waitForVaadin(clientBrowser.driver());
-		playerNamePrompt.pressEnter();
+		clientBrowser.$("#" + CssId.JOIN_GAME_BUTTON).click();
+		waitForVaadin(clientBrowser.driver());
+		// playerNamePrompt.pressEnter();
 
 		// int statusCounter = Integer.parseInt(statusWebElement.getAttribute(HTLMProperties.STATUS_COUNTER));
 
 		RequestedAction requestedAction = RequestedAction.WAIT;
 		while(requestedAction != RequestedAction.GAME_FINISHED_GO_HOME)
 		{
-			syncWithOtherPlayers(clientBrowser);
+			syncWithOtherPlayers(gameId, clientBrowser);
 			SelenideElement statusSelenideElement = clientBrowser.$("#" + CssId.STATUS);
 			WebElement statusWebElement = statusSelenideElement.toWebElement();
 			String attribute = statusWebElement.getAttribute(HTLMProperties.REQUESTED_ACTION);
 			if(attribute == null)
 			{
-				// TODO: how can this happen?
-				// Thread.sleep(10000);
-				// continue;
+				// Happens before the game starts
+				continue;
 			}
+			// throw new AssertionError("how can this happen? Attribute is null");
+			// TODO: how can this happen?
+			// Thread.sleep(10000);
+			// continue;
 			requestedAction = RequestedAction.fromAttribute(attribute);
 			System.out.println(playerName + " is requested to: " + requestedAction);
+			closeRoundSummarizationIfItExists(clientBrowser);
 			switch(requestedAction)
 			{
 			case GUESS_WHICH_CARD:
 				clickFirstCard(clientBrowser);
-				// signalThatActionWasTaken();
+				// signalThatActionWasTaken(gameId);
 				break;
 			case MAKE_A_SENTENCE:
+				// TODO: how to avoid repeated calls?
 				makeSentenceAndPickCard(clientBrowser);
-				// signalThatActionWasTaken();
+				// signalThatActionWasTaken(gameId);
 				break;
 			case MATCH_CARD_TO_SENTENCE:
 				clickFirstCard(clientBrowser);
-				// signalThatActionWasTaken();
+				// signalThatActionWasTaken(gameId);
 				break;
 			case WAIT:
 				break;
@@ -201,43 +241,68 @@ public class DixitViewSelenideIT
 			default:
 				break;
 			}
-
+			if(requestedAction != RequestedAction.GAME_FINISHED_GO_HOME && requestedAction != RequestedAction.WAIT)
+			{
+				statusSelenideElement.waitWhile(Condition.attribute(HTLMProperties.REQUESTED_ACTION, requestedAction.asAttribute()), 10000);
+			}
 		}
 	}
 
-	// TODO: use StatusController instead
-	private void signalThatActionWasTaken()
+	private void closeRoundSummarizationIfItExists(SelenideDriver clientBrowser)
 	{
-		barrier.reset();
-		barrier = new CyclicBarrier(nrOfPlayers);
+		SelenideElement closeButton = clientBrowser.$("#" + CssId.CLOSE_SUMMARIZATION);
+		if(closeButton.exists())
+		{
+			closeButton.click();
+		}
 	}
 
-	private static volatile CyclicBarrier barrier = new CyclicBarrier(nrOfPlayers);
+	private void signalThatActionWasTaken(String gameId) throws AssertionError, TimeoutException
+	{
+		flushServerSideEvents(gameId);
+	}
 
-	private void syncWithOtherPlayers(SelenideDriver clientBrowser) throws InterruptedException, TimeoutException
+	private static final CyclicBarrier barrier = new CyclicBarrier(nrOfPlayers);
+
+	private void syncWithOtherPlayers(String gameId, SelenideDriver clientBrowser)
+			throws InterruptedException, TimeoutException, BrokenBarrierException
 	{
 		waitForVaadin(clientBrowser.driver());
 		// Wait until all players have finished responded to the last requested action
-		try
-		{
-			barrier.await(30, TimeUnit.SECONDS);
-		}
-		catch(BrokenBarrierException e)
-		{
-			System.out.println("Broken barrier, checking what to do again");
-			// A player that did an action might have reset this barrier,
-			// retry to see if there is any new action this player can do
-			return;
-		}
+		barrier.await(60, TimeUnit.SECONDS);
+		// flushServerSideEvents(gameId);
 		waitForVaadin(clientBrowser.driver());
+	}
+
+	private void flushServerSideEvents(String gameId) throws AssertionError, TimeoutException
+	{
+		Status status = statusController.wait(gameId, 10L, TimeUnit.SECONDS);
+		switch(status)
+		{
+		case FLUSHED:
+			// Server side events are cleared, good
+			break;
+		case GAME_DOES_NOT_EXIST:
+			throw new AssertionError(gameId + " does not exist");
+		case SHUTTING_DOWN:
+			throw new IllegalStateException("Server is shutting down before players disconnected?");
+		case TIMEOUT:
+			throw new TimeoutException("Flushing events took more than the allowed timeout");
+		case TOO_MANY_FLUSHERS:
+			throw new IllegalStateException("Tests are stacking up flush calls? Not allowed.");
+		default:
+			break;
+		}
 	}
 
 	private void makeSentenceAndPickCard(SelenideDriver clientBrowser)
 	{
 		// TODO: make funnier sentences
+		waitForVaadin(clientBrowser.driver());
 		SelenideElement sentencePrompt = clientBrowser.$("#" + CssId.SENTENCE_PROMPT);
-		sentencePrompt.sendKeys("Random");
-		sentencePrompt.pressEnter();
+		sentencePrompt.sendKeys("Random" + Keys.ENTER);
+		clientBrowser.$("#" + CssId.SEND_SENTENCE).click();
+		// sentencePrompt.pressEnter();
 		waitForVaadin(clientBrowser.driver());
 		clickFirstCard(clientBrowser);
 	}

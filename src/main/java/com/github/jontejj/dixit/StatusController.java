@@ -14,16 +14,16 @@
  */
 package com.github.jontejj.dixit;
 
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-@RestController
-public class StatusController
+@Path("")
+public interface StatusController
 {
 	public enum Status
 	{
@@ -34,14 +34,6 @@ public class StatusController
 		GAME_DOES_NOT_EXIST
 	}
 
-	private final Games games;
-
-	public StatusController(@Autowired Games games)
-	{
-		this.games = games;
-
-	}
-
 	/**
 	 * Waits (for the given timeout in {@link TimeUnit}) until the queue of events have been cleared.
 	 * 
@@ -50,12 +42,8 @@ public class StatusController
 	 * @param timeUnit in what unit to wait
 	 * @return {@link Status} as soon as the queue is cleared or until the timeout occurs
 	 */
-	@GetMapping("dixit/{gameId}/flush-and-wait/{timeout}/{timeUnit}")
-	public Status wait(@PathVariable String gameId, @PathVariable Long timeout, @PathVariable TimeUnit timeUnit)
-	{
-		Optional<Dixit> game = games.get(gameId);
-		if(game.isEmpty())
-			return Status.GAME_DOES_NOT_EXIST;
-		return game.get().flushEvents(timeUnit, timeout);
-	}
+	@GET
+	@Path("{gameId}/flush-and-wait/{timeout}/{timeUnit}")
+	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	public Status wait(@PathParam("gameId") String gameId, @PathParam("timeout") Long timeout, @PathParam("timeUnit") TimeUnit timeUnit);
 }
