@@ -396,7 +396,7 @@
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<configuration>
 							<systemPropertyVariables>
-								<selenide.remote>http://localhost:4444/wd/hub</selenide.remote>
+								<selenide.remote>http://host.docker.internal:4444/wd/hub</selenide.remote>
 								<!-- TODO: is this really needed? -->
 								<sut.url>http://host.docker.internal/dixit</sut.url>
 							</systemPropertyVariables>
