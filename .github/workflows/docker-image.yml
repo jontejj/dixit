@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: Xotabu4/selenoid-github-action@v1
+    #  - uses: Xotabu4/selenoid-github-action@v1
       - uses: whoan/docker-build-with-cache-action@v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
