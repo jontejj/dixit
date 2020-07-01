@@ -20,8 +20,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - uses: whoan/docker-build-with-cache-action@v5
-      - name: Zalenium
-        uses: ajinx/zalenium@v1.1
+      - uses: Xotabu4/selenoid-github-action@v1
 
       - uses: whoan/docker-build-with-cache-action@v5
         with:
