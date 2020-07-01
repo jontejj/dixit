@@ -110,7 +110,7 @@ public class DixitViewSelenideIT
 		ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nrOfPlayers));
 		List<ListenableFuture<?>> futures = new ArrayList<>();
 		// Other players join
-		for(int i = 0; i < nrOfPlayers; i++)
+		for(int i = 1; i < nrOfPlayers; i++)
 		{
 			futures.add(executor.submit(automaticallyPlayingclient(gameId, randomPlayerName())));
 		}
@@ -126,15 +126,6 @@ public class DixitViewSelenideIT
 		ListenableFuture<List<Object>> allFuturesList = Futures.allAsList(futures);
 		// A game between nrOfPlayers should finish within the allowed timeout
 		allFuturesList.get(500, TimeUnit.SECONDS);
-
-		// TODO: get the logs from all drivers
-		List<String> severeLogEntries = new ArrayList<>();
-		for(String logEntry : Selenide.getWebDriverLogs(LogType.BROWSER, Level.SEVERE))
-		{
-			severeLogEntries.add(logEntry);
-		}
-		assertThat(severeLogEntries).isEmpty();
-
 	}
 
 	private String urlToJoinFromGameId(String gameId)
@@ -211,6 +202,7 @@ public class DixitViewSelenideIT
 			if(attribute == null)
 			{
 				// Happens before the game starts
+				Thread.sleep(10);
 				continue;
 			}
 			// throw new AssertionError("how can this happen? Attribute is null");
@@ -219,7 +211,6 @@ public class DixitViewSelenideIT
 			// continue;
 			requestedAction = RequestedAction.fromAttribute(attribute);
 			System.out.println(playerName + " is requested to: " + requestedAction);
-			closeRoundSummarizationIfItExists(clientBrowser);
 			switch(requestedAction)
 			{
 			case GUESS_WHICH_CARD:
@@ -227,11 +218,13 @@ public class DixitViewSelenideIT
 				// signalThatActionWasTaken(gameId);
 				break;
 			case MAKE_A_SENTENCE:
+				closeRoundSummarizationIfItExists(clientBrowser);
 				// TODO: how to avoid repeated calls?
 				makeSentenceAndPickCard(clientBrowser);
 				// signalThatActionWasTaken(gameId);
 				break;
 			case MATCH_CARD_TO_SENTENCE:
+				closeRoundSummarizationIfItExists(clientBrowser);
 				clickFirstCard(clientBrowser);
 				// signalThatActionWasTaken(gameId);
 				break;
@@ -243,9 +236,17 @@ public class DixitViewSelenideIT
 			}
 			if(requestedAction != RequestedAction.GAME_FINISHED_GO_HOME && requestedAction != RequestedAction.WAIT)
 			{
-				statusSelenideElement.waitWhile(Condition.attribute(HTLMProperties.REQUESTED_ACTION, requestedAction.asAttribute()), 10000);
+				statusSelenideElement.shouldNotHave(Condition.attribute(HTLMProperties.REQUESTED_ACTION, requestedAction.asAttribute()));
+				// statusSelenideElement.waitWhile(Condition.attribute(HTLMProperties.REQUESTED_ACTION, requestedAction.asAttribute()),
+				// 10000);
 			}
 		}
+		List<String> severeLogEntries = new ArrayList<>();
+		for(String logEntry : clientBrowser.getWebDriverLogs().logs(LogType.BROWSER, Level.SEVERE))
+		{
+			severeLogEntries.add(logEntry);
+		}
+		assertThat(severeLogEntries).isEmpty();
 	}
 
 	private void closeRoundSummarizationIfItExists(SelenideDriver clientBrowser)
