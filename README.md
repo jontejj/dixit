@@ -75,6 +75,7 @@ Remember to set jdk 11 as java home
 
 ```
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/openjdk-11.jdk/Contents/Home/"
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
 ## Hot swapping (as Vaadin supports it pretty well)
