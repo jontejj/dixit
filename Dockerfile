@@ -28,7 +28,7 @@ RUN npm install
 COPY frontend frontend
 COPY src src
 #TODO: enable zalenium profile when it's ready
-RUN mvn verify -Pproduction,selenoid --no-transfer-progress
+RUN mvn verify -Pproduction --no-transfer-progress
 
 # build modules distribution
 RUN jlink --compress=2 --verbose --add-modules java.base,java.logging,java.naming,java.desktop,java.management,java.security.jgss,java.instrument --no-header-files --no-man-pages --output "$JAVA_MINIMAL"

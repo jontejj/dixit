@@ -38,12 +38,15 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.junit.Rule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
+import org.testcontainers.containers.BrowserWebDriverContainer;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Driver;
@@ -67,17 +70,23 @@ public class DixitViewSelenideIT
 
 	private final StatusController statusController;
 
+	@Rule public BrowserWebDriverContainer playerOne = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+	@Rule public BrowserWebDriverContainer playerTwo = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+	@Rule public BrowserWebDriverContainer playerThree = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+
 	public DixitViewSelenideIT()
 	{
-		String sutUrl = System.getProperty("sut.url");
-		if(sutUrl != null)
-		{
-			BASE_GAME_URL = sutUrl;
-		}
-		else
-		{
-			BASE_GAME_URL = "http://localhost/dixit";
-		}
+		// chrome.getTestHostIpAddress()
+		// String sutUrl = System.getProperty("sut.url");
+		// if(sutUrl != null)
+		// {
+		// BASE_GAME_URL = sutUrl;
+		// }
+		// else
+		// {
+		BASE_GAME_URL = "http://" + playerOne.getTestHostIpAddress() + "/dixit";
+		// }
+		System.out.println("SUT: " + BASE_GAME_URL);
 		ResteasyClient client = new ResteasyClientBuilderImpl().build();
 		ResteasyWebTarget target = client.target(UriBuilder.fromPath(BASE_GAME_URL + "-rest"));
 		statusController = target.proxy(StatusController.class);
@@ -103,17 +112,18 @@ public class DixitViewSelenideIT
 	public void performanceTestDixit() throws InterruptedException, ExecutionException, TimeoutException
 	{
 		System.out.println(System.getProperty("selenide.remote"));
-		SelenideDriver clientBrowser = new SelenideDriver(new SelenideConfig());
+		SelenideDriver clientBrowser = createBrowser(playerOne);
 		String gameId = createGame(clientBrowser);
 
-		// TODO: join with the main browser as well
 		ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nrOfPlayers));
 		List<ListenableFuture<?>> futures = new ArrayList<>();
 		// Other players join
-		for(int i = 1; i < nrOfPlayers; i++)
-		{
-			futures.add(executor.submit(automaticallyPlayingclient(gameId, randomPlayerName())));
-		}
+		futures.add(executor.submit(automaticallyPlayingclient(playerTwo, gameId, randomPlayerName())));
+		futures.add(executor.submit(automaticallyPlayingclient(playerThree, gameId, randomPlayerName())));
+		// for(int i = 1; i < nrOfPlayers; i++)
+		// {
+		// futures.add(executor.submit(automaticallyPlayingclient(gameId, randomPlayerName())));
+		// }
 		futures.add(executor.submit(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception
@@ -126,6 +136,18 @@ public class DixitViewSelenideIT
 		ListenableFuture<List<Object>> allFuturesList = Futures.allAsList(futures);
 		// A game between nrOfPlayers should finish within the allowed timeout
 		allFuturesList.get(500, TimeUnit.SECONDS);
+	}
+
+	private SelenideDriver createBrowser(BrowserWebDriverContainer container)
+	{
+		SelenideConfig selenideConfig = new SelenideConfig();
+		selenideConfig.browserCapabilities().setCapability("enableVideo", true);
+		selenideConfig.browserCapabilities().setCapability("enableLog", true);
+		// RemoteWebDriver driver = container.getWebDriver();
+		// WebDriverRunner.setWebDriver(driver);
+		SelenideDriver clientBrowser = new SelenideDriver(selenideConfig, container.getWebDriver(), null);
+		// clientBrowser.browser().
+		return clientBrowser;
 	}
 
 	private String urlToJoinFromGameId(String gameId)
@@ -167,10 +189,10 @@ public class DixitViewSelenideIT
 		return gameId;
 	}
 
-	private Callable<Void> automaticallyPlayingclient(String gameId, String playerName)
+	private Callable<Void> automaticallyPlayingclient(BrowserWebDriverContainer container, String gameId, String playerName)
 	{
 		return () -> {
-			SelenideDriver clientBrowser = new SelenideDriver(new SelenideConfig());
+			SelenideDriver clientBrowser = createBrowser(container);
 			String urlToGame = urlToJoinFromGameId(gameId);
 			clientBrowser.open(urlToGame);
 
