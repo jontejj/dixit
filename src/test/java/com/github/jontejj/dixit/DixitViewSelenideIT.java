@@ -38,7 +38,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
-import org.junit.Rule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -47,6 +46,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
 import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Driver;
@@ -63,6 +64,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 //@SpringBootTest
 //@ExtendWith(SpringExtension.class)
+@Testcontainers
 public class DixitViewSelenideIT
 {
 	private final String BASE_GAME_URL;
@@ -70,9 +72,9 @@ public class DixitViewSelenideIT
 
 	private final StatusController statusController;
 
-	@Rule public BrowserWebDriverContainer playerOne = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
-	@Rule public BrowserWebDriverContainer playerTwo = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
-	@Rule public BrowserWebDriverContainer playerThree = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+	@Container public BrowserWebDriverContainer playerOne = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+	//@Container public BrowserWebDriverContainer playerTwo = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+	//@Container public BrowserWebDriverContainer playerThree = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
 
 	public DixitViewSelenideIT()
 	{
@@ -84,7 +86,8 @@ public class DixitViewSelenideIT
 		// }
 		// else
 		// {
-		BASE_GAME_URL = "http://" + playerOne.getTestHostIpAddress() + "/dixit";
+		// playerOne.getTestHostIpAddress()
+		BASE_GAME_URL = "http://host.docker.internal/dixit";
 		// }
 		System.out.println("SUT: " + BASE_GAME_URL);
 		ResteasyClient client = new ResteasyClientBuilderImpl().build();
@@ -118,8 +121,8 @@ public class DixitViewSelenideIT
 		ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nrOfPlayers));
 		List<ListenableFuture<?>> futures = new ArrayList<>();
 		// Other players join
-		futures.add(executor.submit(automaticallyPlayingclient(playerTwo, gameId, randomPlayerName())));
-		futures.add(executor.submit(automaticallyPlayingclient(playerThree, gameId, randomPlayerName())));
+		//futures.add(executor.submit(automaticallyPlayingclient(playerTwo, gameId, randomPlayerName())));
+		//futures.add(executor.submit(automaticallyPlayingclient(playerThree, gameId, randomPlayerName())));
 		// for(int i = 1; i < nrOfPlayers; i++)
 		// {
 		// futures.add(executor.submit(automaticallyPlayingclient(gameId, randomPlayerName())));
