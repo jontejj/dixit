@@ -17,5 +17,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        run: |-
-         echo `ip addr show docker0 | grep -Po 'inet \K[\d.]+'`
+     - name: Deploy
+       run: |-
+        echo `ip addr show docker0 | grep -Po 'inet \K[\d.]+'`
