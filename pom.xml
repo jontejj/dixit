@@ -388,7 +388,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>zalenium</id>
+			<id>selenoid</id>
 			<build>
 				<plugins>
 					<plugin>
