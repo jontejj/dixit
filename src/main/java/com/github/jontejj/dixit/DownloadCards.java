@@ -24,6 +24,7 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.common.base.Strings;
 
 public class DownloadCards
 {
@@ -33,8 +34,10 @@ public class DownloadCards
 		HttpRequestFactory rf = httpTransport.createRequestFactory();
 		for(int i = 1; i < 200; i++)
 		{
-			HttpRequest httpRequest = rf.buildGetRequest(new GenericUrl("http://www.boiteajeux.net/jeux/dix/img/" + i + ".png"));
-			try(OutputStream outputStream = new FileOutputStream(new File("src/main/resources/cards/" + i + ".png")))
+			HttpRequest httpRequest = rf.buildGetRequest(new GenericUrl(
+					"https://github.com/jminuscula/dixit-online/raw/master/cards/card_" + Strings.padStart(i + "", 5, '0') + ".jpg"));
+			// HttpRequest httpRequest = rf.buildGetRequest(new GenericUrl("http://www.boiteajeux.net/jeux/dix/img/" + i + ".png"));
+			try(OutputStream outputStream = new FileOutputStream(new File("src/main/resources/cards/" + i + ".jpg")))
 			{
 				HttpResponse response = httpRequest.execute();
 				response.download(outputStream);

@@ -14,9 +14,6 @@
  */
 package com.github.jontejj.dixit;
 
-import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -52,7 +49,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Driver;
 import com.codeborne.selenide.ElementsCollection;
-import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideConfig;
 import com.codeborne.selenide.SelenideDriver;
 import com.codeborne.selenide.SelenideElement;
@@ -72,9 +68,9 @@ public class DixitViewSelenideIT
 
 	private final StatusController statusController;
 
-	@Container public BrowserWebDriverContainer playerOne = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
-	//@Container public BrowserWebDriverContainer playerTwo = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
-	//@Container public BrowserWebDriverContainer playerThree = new BrowserWebDriverContainer().withCapabilities(new ChromeOptions());
+	@Container public BrowserWebDriverContainer<?> playerOne = container(10000);
+	@Container public BrowserWebDriverContainer playerTwo = container(10001);
+	@Container public BrowserWebDriverContainer playerThree = container(10002);
 
 	public DixitViewSelenideIT()
 	{
@@ -86,7 +82,8 @@ public class DixitViewSelenideIT
 		// }
 		// else
 		// {
-		// playerOne.getTestHostIpAddress()
+		// playerOne.
+		// ()
 		BASE_GAME_URL = "http://host.docker.internal/dixit";
 		// }
 		System.out.println("SUT: " + BASE_GAME_URL);
@@ -95,23 +92,20 @@ public class DixitViewSelenideIT
 		statusController = target.proxy(StatusController.class);
 	}
 
-	@Test
-	@Disabled("Just an example of a test")
-	public void googleShowsWiktionaryLinkForCheesy()
+	private static BrowserWebDriverContainer<?> container(int port)
 	{
-		open("https://google.com/ncr");
-		$(By.name("q")).setValue("cheesy").submit();
-		$("div.g>div.rc>div.r>a[href=\"https://en.wiktionary.org/wiki/cheesy\"]>h3").shouldHave(exactText("cheesy - Wiktionary"));
-		for(String logEntry : Selenide.getWebDriverLogs(LogType.BROWSER, Level.INFO))
-		{
-			System.out.println("Browser log: " + logEntry);
-		}
+		BrowserWebDriverContainer container = new BrowserWebDriverContainer();
+		container.withCapabilities(new ChromeOptions());
+		container.withExposedPorts(port);
+		// container.setBinds(binds);
+		return container;
 	}
 
 	static final int nrOfPlayers = 3;
 
 	// TODO: take a screenshot for failures
 	@Test
+	@Disabled
 	public void performanceTestDixit() throws InterruptedException, ExecutionException, TimeoutException
 	{
 		System.out.println(System.getProperty("selenide.remote"));
@@ -121,8 +115,8 @@ public class DixitViewSelenideIT
 		ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nrOfPlayers));
 		List<ListenableFuture<?>> futures = new ArrayList<>();
 		// Other players join
-		//futures.add(executor.submit(automaticallyPlayingclient(playerTwo, gameId, randomPlayerName())));
-		//futures.add(executor.submit(automaticallyPlayingclient(playerThree, gameId, randomPlayerName())));
+		// futures.add(executor.submit(automaticallyPlayingclient(playerTwo, gameId, randomPlayerName())));
+		// futures.add(executor.submit(automaticallyPlayingclient(playerThree, gameId, randomPlayerName())));
 		// for(int i = 1; i < nrOfPlayers; i++)
 		// {
 		// futures.add(executor.submit(automaticallyPlayingclient(gameId, randomPlayerName())));

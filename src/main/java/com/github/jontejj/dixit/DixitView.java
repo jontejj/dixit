@@ -14,10 +14,12 @@ import static com.github.jontejj.dixit.TranslationKey.WAITING_FOR_OTHER_PLAYERS_
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +84,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 		NO
 	}
 
-	private static final String BUCKET_BASEPATH = "https://storage.googleapis.com/com-github-jontejj-dixit/cards/";
+	private static final String BUCKET_BASEPATH = "https://storage.googleapis.com/com-github-jontejj-dixit/cards/2/";
 
 	private final Games games;
 
@@ -525,7 +527,8 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 
 	private Image imageFor(Card card)
 	{
-		Image cardImage = new Image(BUCKET_BASEPATH + card.number + ".png", card.toString());
+		// PNG vs jpg
+		Image cardImage = new Image(BUCKET_BASEPATH + card.number + ".jpg", card.toString());
 		cardImage.addClassName("card");
 		return cardImage;
 	}
@@ -589,7 +592,21 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			scoresView.add(new Label(p.player.name + ": " + summarization.getTotalScoreIncreseForPlayer(p.player)));
 		}
 		HorizontalLayout pickedCardsView = new HorizontalLayout();
-		summarization.forEachPickedCard((pickedCard, playersWhoGuessedIt) -> {
+		summarization.forEachGivenCard(showCardWithPlayersThatPickedIt(summarization, pickedCardsView));
+		Button closeButton = new Button(getTranslation(TranslationKey.CLOSE_ROUND_SUMMARIZATION.key()), e -> {
+			this.left.remove(summarizationView);
+			summarizationView = null;
+		});
+		closeButton.setId(CssId.CLOSE_SUMMARIZATION);
+		pickedCardsView.add(closeButton);
+		summarizationView.add(scoresView, pickedCardsView);
+		this.left.add(summarizationView);
+	}
+
+	private BiConsumer<PickedCard, Collection<Player>> showCardWithPlayersThatPickedIt(RoundSummarization summarization,
+			HorizontalLayout pickedCardsView)
+	{
+		return (pickedCard, playersWhoGuessedIt) -> {
 			VerticalLayout pickedCardView = new VerticalLayout();
 			Label playedBy = new Label(getTranslation(TranslationKey.CARD_PLAYED_BY.key(), pickedCard.pickedBy));
 			if(pickedCard.pickedBy.equals(summarization.getStoryTeller()))
@@ -600,15 +617,7 @@ public class DixitView extends HorizontalLayout implements HasUrlParameter<Strin
 			pickedCardView.add(new Label(getTranslation(TranslationKey.CARD_PICKED_BY.key(), playersWhoGuessedIt)));
 			pickedCardView.add(imageFor(pickedCard));
 			pickedCardsView.add(pickedCardView);
-		});
-		Button closeButton = new Button(getTranslation(TranslationKey.CLOSE_ROUND_SUMMARIZATION.key()), e -> {
-			this.left.remove(summarizationView);
-			summarizationView = null;
-		});
-		closeButton.setId(CssId.CLOSE_SUMMARIZATION);
-		pickedCardsView.add(closeButton);
-		summarizationView.add(scoresView, pickedCardsView);
-		this.left.add(summarizationView);
+		};
 	}
 
 	@Override

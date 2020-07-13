@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 
 import com.github.jontejj.dixit.RoundSummarization.Scores;
 import com.github.jontejj.dixit.exceptions.InvalidCardPicked;
@@ -29,6 +30,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 /**
  * Looks at 6 cards in her hand
@@ -138,6 +140,7 @@ public class StoryTeller
 				}
 			}
 		}
-		return new RoundSummarization(player, new Scores(scores), guesses);
+		Set<PickedCard> notPickedCards = Sets.difference(Sets.newHashSet(givenCards), guesses.keySet());
+		return new RoundSummarization(player, new Scores(scores), guesses, notPickedCards);
 	}
 }

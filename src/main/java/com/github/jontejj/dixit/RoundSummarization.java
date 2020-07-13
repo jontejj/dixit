@@ -15,6 +15,8 @@
 package com.github.jontejj.dixit;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -26,11 +28,13 @@ public final class RoundSummarization
 	private final Player storyTeller;
 	private final Scores scores;
 	private final Multimap<PickedCard, Player> guesses = LinkedHashMultimap.create();
+	private final Set<PickedCard> notPickedCards;
 
-	RoundSummarization(Player storyTeller, Scores scores, Multimap<PickedCard, Player> guesses)
+	RoundSummarization(Player storyTeller, Scores scores, Multimap<PickedCard, Player> guesses, Set<PickedCard> notPickedCards)
 	{
 		this.storyTeller = storyTeller;
 		this.scores = scores;
+		this.notPickedCards = notPickedCards;
 		this.guesses.putAll(guesses);
 	}
 
@@ -39,9 +43,10 @@ public final class RoundSummarization
 		return scores.getTotalScoreIncrease(x);
 	}
 
-	public void forEachPickedCard(BiConsumer<PickedCard, Collection<Player>> consumer)
+	public void forEachGivenCard(BiConsumer<PickedCard, Collection<Player>> consumer)
 	{
 		guesses.keySet().forEach(card -> consumer.accept(card, guesses.get(card)));
+		notPickedCards.forEach(card -> consumer.accept(card, Collections.emptySet()));
 	}
 
 	public Player getStoryTeller()
