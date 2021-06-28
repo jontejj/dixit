@@ -11,7 +11,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<vaadin.version>14.2.1</vaadin.version><!-- 14.3 -->
+		<vaadin.version>14.6.2</vaadin.version><!-- 14.3 -->
 		<junit.jupiter.version>5.6.2</junit.jupiter.version>
 		<!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=547340 -->
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
